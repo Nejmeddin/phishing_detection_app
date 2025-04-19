@@ -1,0 +1,29 @@
+# Dépendances principales
+streamlit==1.31.0
+lightgbm==4.1.0
+numpy==1.26.3
+pandas==2.1.4
+scikit-learn==1.3.2
+matplotlib==3.8.0
+seaborn==0.13.0
+plotly==5.18.0
+altair==5.2.0
+
+# Dépendances pour le traitement des URLs et les APIs
+tldextract==5.1.1
+requests==2.31.0
+urllib3==2.0.7
+ipaddress==1.0.23
+
+# Dépendances pour SMOTE et autres techniques de prétraitement
+imbalanced-learn==0.12.0
+
+# Dépendances pour les visualisations 3D
+matplotlib-inline==0.1.6
+
+beautifulsoup4
+requests
+
+
+# Nouvelle section pour les APIs d'enrichissement
+python-whois==0.8.0

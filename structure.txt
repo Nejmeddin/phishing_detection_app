@@ -1,0 +1,35 @@
+📁 Project Structure:
+
+├── README.md
+├── data
+│   ├── processed
+│   │   ├── lightgbm_phishing_model.pkl
+│   ├── raw
+│   │   ├── Phishing_Legitimate_full.csv
+├── generate_tree.py
+├── main.py
+├── pages
+│   ├── __init__.py
+│   ├── data_exploration.py
+│   ├── home.py
+│   ├── model_performance.py
+│   ├── prediction.py
+│   ├── preprocessing.py
+├── requirements.txt
+├── src
+│   ├── __init__.py
+│   ├── config.py
+│   ├── model
+│   │   ├── __init__.py
+│   │   ├── model_loader.py
+│   ├── preprocessing
+│   │   ├── __init__.py
+│   │   ├── feature_extractor.py
+│   ├── utils
+│   │   ├── feature_enrichment.py
+│   ├── visualization
+│   │   ├── __init__.py
+│   │   ├── data_viz.py
+│   │   ├── model_viz.py
+│   │   ├── results_viz.py
+├── structure.txt

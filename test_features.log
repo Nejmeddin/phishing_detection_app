@@ -1,0 +1,405 @@
+2025-04-16 23:22:02,355 - __main__ - INFO - Début des tests d'extraction de caractéristiques
+2025-04-16 23:22:02,355 - __main__ - WARNING - Fichier modèle non trouvé: C:\Users\User\Desktop\ml_phishing\data\processed\lightgbm_phishing_model.pkl
+2025-04-16 23:22:02,356 - __main__ - INFO - 
+================================================================================
+Test pour l'URL: https://www.google.com
+================================================================================
+2025-04-16 23:22:02,356 - src.preprocessing.feature_extractor - INFO - Features required by the model: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits', 'LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:02,357 - src.preprocessing.feature_extractor - INFO - URL features to extract: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits']
+2025-04-16 23:22:02,357 - src.preprocessing.feature_extractor - INFO - HTML features to extract: ['LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:02,357 - src.preprocessing.feature_extractor - INFO - Extracting features for URL: https://www.google.com
+2025-04-16 23:22:03,203 - src.preprocessing.feature_extractor - INFO - Extraction successful: 23 features extracted
+2025-04-16 23:22:03,203 - __main__ - INFO - Temps d'extraction: 0.85 secondes
+2025-04-16 23:22:03,204 - __main__ - INFO - Caractéristiques extraites: 23
+2025-04-16 23:22:03,204 - __main__ - INFO - 
+Résumé des caractéristiques:
+2025-04-16 23:22:03,205 - __main__ - INFO -   HasCopyright: 1
+2025-04-16 23:22:03,205 - __main__ - INFO -   HasFavicon: 0
+2025-04-16 23:22:03,205 - __main__ - INFO -   HasKeywordCrypto: 0
+2025-04-16 23:22:03,205 - __main__ - INFO -   HasMeta: 1
+2025-04-16 23:22:03,206 - __main__ - INFO -   HasPasswordField: 0
+2025-04-16 23:22:03,206 - __main__ - INFO -   HasSocialNetworking: 0
+2025-04-16 23:22:03,206 - __main__ - INFO -   HasSubmitButton: 1
+2025-04-16 23:22:03,207 - __main__ - INFO -   HasTitle: 1
+2025-04-16 23:22:03,207 - __main__ - INFO -   IsHTTPS: 1
+2025-04-16 23:22:03,208 - __main__ - INFO -   LineLength: 119
+2025-04-16 23:22:03,208 - __main__ - INFO -   NoOfCSS: 42
+2025-04-16 23:22:03,208 - __main__ - INFO -   NoOfDigits: 0
+2025-04-16 23:22:03,208 - __main__ - INFO -   NoOfDots: 2
+2025-04-16 23:22:03,209 - __main__ - INFO -   NoOfHyperlink: 16
+2025-04-16 23:22:03,209 - __main__ - INFO -   NoOfImage: 11
+2025-04-16 23:22:03,209 - __main__ - INFO -   NoOfJS: 12
+2025-04-16 23:22:03,210 - __main__ - INFO -   NoOfObfuscatedChar: 0
+2025-04-16 23:22:03,210 - __main__ - INFO -   NoOfPopup: 1
+2025-04-16 23:22:03,210 - __main__ - INFO -   NoOfQmark: 0
+2025-04-16 23:22:03,210 - __main__ - INFO -   NoOfSubDomain: 1
+2025-04-16 23:22:03,211 - __main__ - INFO -   NoOfURLRedirect: 5
+2025-04-16 23:22:03,211 - __main__ - INFO -   NoOfiFrame: 0
+2025-04-16 23:22:03,211 - __main__ - INFO -   URLLength: 22
+2025-04-16 23:22:03,213 - __main__ - INFO - 
+================================================================================
+Test pour l'URL: http://example.com
+================================================================================
+2025-04-16 23:22:03,213 - src.preprocessing.feature_extractor - INFO - Features required by the model: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits', 'LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:03,214 - src.preprocessing.feature_extractor - INFO - URL features to extract: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits']
+2025-04-16 23:22:03,214 - src.preprocessing.feature_extractor - INFO - HTML features to extract: ['LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:03,214 - src.preprocessing.feature_extractor - INFO - Extracting features for URL: http://example.com
+2025-04-16 23:22:03,505 - src.preprocessing.feature_extractor - INFO - Extraction successful: 23 features extracted
+2025-04-16 23:22:03,505 - __main__ - INFO - Temps d'extraction: 0.29 secondes
+2025-04-16 23:22:03,506 - __main__ - INFO - Caractéristiques extraites: 23
+2025-04-16 23:22:03,506 - __main__ - INFO - 
+Résumé des caractéristiques:
+2025-04-16 23:22:03,506 - __main__ - INFO -   HasCopyright: 0
+2025-04-16 23:22:03,507 - __main__ - INFO -   HasFavicon: 0
+2025-04-16 23:22:03,507 - __main__ - INFO -   HasKeywordCrypto: 0
+2025-04-16 23:22:03,508 - __main__ - INFO -   HasMeta: 1
+2025-04-16 23:22:03,508 - __main__ - INFO -   HasPasswordField: 0
+2025-04-16 23:22:03,509 - __main__ - INFO -   HasSocialNetworking: 0
+2025-04-16 23:22:03,509 - __main__ - INFO -   HasSubmitButton: 0
+2025-04-16 23:22:03,510 - __main__ - INFO -   HasTitle: 1
+2025-04-16 23:22:03,510 - __main__ - INFO -   IsHTTPS: 0
+2025-04-16 23:22:03,510 - __main__ - INFO -   LineLength: 46
+2025-04-16 23:22:03,510 - __main__ - INFO -   NoOfCSS: 1
+2025-04-16 23:22:03,511 - __main__ - INFO -   NoOfDigits: 0
+2025-04-16 23:22:03,511 - __main__ - INFO -   NoOfDots: 1
+2025-04-16 23:22:03,511 - __main__ - INFO -   NoOfHyperlink: 1
+2025-04-16 23:22:03,512 - __main__ - INFO -   NoOfImage: 0
+2025-04-16 23:22:03,512 - __main__ - INFO -   NoOfJS: 0
+2025-04-16 23:22:03,512 - __main__ - INFO -   NoOfObfuscatedChar: 0
+2025-04-16 23:22:03,513 - __main__ - INFO -   NoOfPopup: 0
+2025-04-16 23:22:03,513 - __main__ - INFO -   NoOfQmark: 0
+2025-04-16 23:22:03,513 - __main__ - INFO -   NoOfSubDomain: 0
+2025-04-16 23:22:03,513 - __main__ - INFO -   NoOfURLRedirect: 0
+2025-04-16 23:22:03,514 - __main__ - INFO -   NoOfiFrame: 0
+2025-04-16 23:22:03,514 - __main__ - INFO -   URLLength: 18
+2025-04-16 23:22:03,515 - __main__ - INFO - 
+================================================================================
+Test pour l'URL: https://subdomain.example.co.uk
+================================================================================
+2025-04-16 23:22:03,515 - src.preprocessing.feature_extractor - INFO - Features required by the model: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits', 'LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:03,515 - src.preprocessing.feature_extractor - INFO - URL features to extract: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits']
+2025-04-16 23:22:03,516 - src.preprocessing.feature_extractor - INFO - HTML features to extract: ['LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:03,516 - src.preprocessing.feature_extractor - INFO - Extracting features for URL: https://subdomain.example.co.uk
+2025-04-16 23:22:03,623 - src.preprocessing.feature_extractor - WARNING - Request attempt 1 failed: HTTPSConnectionPool(host='subdomain.example.co.uk', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x00000180C6AFA180>: Failed to resolve 'subdomain.example.co.uk' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:22:03,624 - src.preprocessing.feature_extractor - INFO - Waiting 1 seconds before retry...
+2025-04-16 23:22:04,628 - src.preprocessing.feature_extractor - WARNING - Request attempt 2 failed: HTTPSConnectionPool(host='subdomain.example.co.uk', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x00000180C66C3E30>: Failed to resolve 'subdomain.example.co.uk' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:22:04,629 - src.preprocessing.feature_extractor - INFO - Waiting 2 seconds before retry...
+2025-04-16 23:22:06,633 - src.preprocessing.feature_extractor - WARNING - Request attempt 3 failed: HTTPSConnectionPool(host='subdomain.example.co.uk', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x00000180C6B65D00>: Failed to resolve 'subdomain.example.co.uk' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:22:06,634 - src.preprocessing.feature_extractor - ERROR - All 3 attempts failed
+2025-04-16 23:22:06,635 - src.preprocessing.feature_extractor - ERROR - Error extracting HTML features: HTTPSConnectionPool(host='subdomain.example.co.uk', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x00000180C6B65D00>: Failed to resolve 'subdomain.example.co.uk' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:22:06,636 - src.preprocessing.feature_extractor - INFO - Extraction successful: 23 features extracted
+2025-04-16 23:22:06,636 - __main__ - INFO - Temps d'extraction: 3.12 secondes
+2025-04-16 23:22:06,638 - __main__ - INFO - Caractéristiques extraites: 23
+2025-04-16 23:22:06,638 - __main__ - INFO - 
+Résumé des caractéristiques:
+2025-04-16 23:22:06,639 - __main__ - INFO -   HasCopyright: 0
+2025-04-16 23:22:06,639 - __main__ - INFO -   HasFavicon: 0
+2025-04-16 23:22:06,639 - __main__ - INFO -   HasKeywordCrypto: 0
+2025-04-16 23:22:06,640 - __main__ - INFO -   HasMeta: 0
+2025-04-16 23:22:06,640 - __main__ - INFO -   HasPasswordField: 0
+2025-04-16 23:22:06,642 - __main__ - INFO -   HasSocialNetworking: 0
+2025-04-16 23:22:06,642 - __main__ - INFO -   HasSubmitButton: 0
+2025-04-16 23:22:06,642 - __main__ - INFO -   HasTitle: 0
+2025-04-16 23:22:06,643 - __main__ - INFO -   IsHTTPS: 1
+2025-04-16 23:22:06,643 - __main__ - INFO -   LineLength: 0
+2025-04-16 23:22:06,643 - __main__ - INFO -   NoOfCSS: 0
+2025-04-16 23:22:06,643 - __main__ - INFO -   NoOfDigits: 0
+2025-04-16 23:22:06,644 - __main__ - INFO -   NoOfDots: 3
+2025-04-16 23:22:06,644 - __main__ - INFO -   NoOfHyperlink: 0
+2025-04-16 23:22:06,644 - __main__ - INFO -   NoOfImage: 0
+2025-04-16 23:22:06,644 - __main__ - INFO -   NoOfJS: 0
+2025-04-16 23:22:06,645 - __main__ - INFO -   NoOfObfuscatedChar: 0
+2025-04-16 23:22:06,645 - __main__ - INFO -   NoOfPopup: 0
+2025-04-16 23:22:06,645 - __main__ - INFO -   NoOfQmark: 0
+2025-04-16 23:22:06,646 - __main__ - INFO -   NoOfSubDomain: 1
+2025-04-16 23:22:06,646 - __main__ - INFO -   NoOfURLRedirect: 0
+2025-04-16 23:22:06,646 - __main__ - INFO -   NoOfiFrame: 0
+2025-04-16 23:22:06,647 - __main__ - INFO -   URLLength: 31
+2025-04-16 23:22:06,647 - __main__ - INFO - 
+================================================================================
+Test pour l'URL: http://malicious-site-with-very-long-domain-name-to-confuse-users.com
+================================================================================
+2025-04-16 23:22:06,647 - src.preprocessing.feature_extractor - INFO - Features required by the model: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits', 'LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:06,648 - src.preprocessing.feature_extractor - INFO - URL features to extract: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits']
+2025-04-16 23:22:06,648 - src.preprocessing.feature_extractor - INFO - HTML features to extract: ['LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:06,649 - src.preprocessing.feature_extractor - INFO - Extracting features for URL: http://malicious-site-with-very-long-domain-name-to-confuse-users.com
+2025-04-16 23:22:06,701 - src.preprocessing.feature_extractor - WARNING - Request attempt 1 failed: HTTPConnectionPool(host='malicious-site-with-very-long-domain-name-to-confuse-users.com', port=80): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x00000180C6B665D0>: Failed to resolve 'malicious-site-with-very-long-domain-name-to-confuse-users.com' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:22:06,701 - src.preprocessing.feature_extractor - INFO - Waiting 1 seconds before retry...
+2025-04-16 23:22:07,713 - src.preprocessing.feature_extractor - WARNING - Request attempt 2 failed: HTTPConnectionPool(host='malicious-site-with-very-long-domain-name-to-confuse-users.com', port=80): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x00000180C6B66810>: Failed to resolve 'malicious-site-with-very-long-domain-name-to-confuse-users.com' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:22:07,714 - src.preprocessing.feature_extractor - INFO - Waiting 2 seconds before retry...
+2025-04-16 23:22:09,718 - src.preprocessing.feature_extractor - WARNING - Request attempt 3 failed: HTTPConnectionPool(host='malicious-site-with-very-long-domain-name-to-confuse-users.com', port=80): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x00000180C6B66C60>: Failed to resolve 'malicious-site-with-very-long-domain-name-to-confuse-users.com' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:22:09,719 - src.preprocessing.feature_extractor - ERROR - All 3 attempts failed
+2025-04-16 23:22:09,720 - src.preprocessing.feature_extractor - ERROR - Error extracting HTML features: HTTPConnectionPool(host='malicious-site-with-very-long-domain-name-to-confuse-users.com', port=80): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x00000180C6B66C60>: Failed to resolve 'malicious-site-with-very-long-domain-name-to-confuse-users.com' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:22:09,720 - src.preprocessing.feature_extractor - INFO - Extraction successful: 23 features extracted
+2025-04-16 23:22:09,721 - __main__ - INFO - Temps d'extraction: 3.07 secondes
+2025-04-16 23:22:09,722 - __main__ - INFO - Caractéristiques extraites: 23
+2025-04-16 23:22:09,722 - __main__ - INFO - 
+Résumé des caractéristiques:
+2025-04-16 23:22:09,723 - __main__ - INFO -   HasCopyright: 0
+2025-04-16 23:22:09,723 - __main__ - INFO -   HasFavicon: 0
+2025-04-16 23:22:09,724 - __main__ - INFO -   HasKeywordCrypto: 0
+2025-04-16 23:22:09,724 - __main__ - INFO -   HasMeta: 0
+2025-04-16 23:22:09,725 - __main__ - INFO -   HasPasswordField: 0
+2025-04-16 23:22:09,725 - __main__ - INFO -   HasSocialNetworking: 0
+2025-04-16 23:22:09,726 - __main__ - INFO -   HasSubmitButton: 0
+2025-04-16 23:22:09,726 - __main__ - INFO -   HasTitle: 0
+2025-04-16 23:22:09,727 - __main__ - INFO -   IsHTTPS: 0
+2025-04-16 23:22:09,727 - __main__ - INFO -   LineLength: 0
+2025-04-16 23:22:09,727 - __main__ - INFO -   NoOfCSS: 0
+2025-04-16 23:22:09,728 - __main__ - INFO -   NoOfDigits: 0
+2025-04-16 23:22:09,728 - __main__ - INFO -   NoOfDots: 1
+2025-04-16 23:22:09,729 - __main__ - INFO -   NoOfHyperlink: 0
+2025-04-16 23:22:09,729 - __main__ - INFO -   NoOfImage: 0
+2025-04-16 23:22:09,730 - __main__ - INFO -   NoOfJS: 0
+2025-04-16 23:22:09,730 - __main__ - INFO -   NoOfObfuscatedChar: 0
+2025-04-16 23:22:09,730 - __main__ - INFO -   NoOfPopup: 0
+2025-04-16 23:22:09,730 - __main__ - INFO -   NoOfQmark: 0
+2025-04-16 23:22:09,731 - __main__ - INFO -   NoOfSubDomain: 0
+2025-04-16 23:22:09,731 - __main__ - INFO -   NoOfURLRedirect: 0
+2025-04-16 23:22:09,732 - __main__ - INFO -   NoOfiFrame: 0
+2025-04-16 23:22:09,732 - __main__ - INFO -   URLLength: 69
+2025-04-16 23:22:09,733 - __main__ - INFO - 
+================================================================================
+Test pour l'URL: https://paypa1.com/secure/login
+================================================================================
+2025-04-16 23:22:09,733 - src.preprocessing.feature_extractor - INFO - Features required by the model: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits', 'LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:09,733 - src.preprocessing.feature_extractor - INFO - URL features to extract: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits']
+2025-04-16 23:22:09,734 - src.preprocessing.feature_extractor - INFO - HTML features to extract: ['LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:09,734 - src.preprocessing.feature_extractor - INFO - Extracting features for URL: https://paypa1.com/secure/login
+2025-04-16 23:22:19,834 - src.preprocessing.feature_extractor - WARNING - Request attempt 1 failed: HTTPSConnectionPool(host='paypa1.com', port=443): Max retries exceeded with url: /secure/login (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000180B1EE74D0>, 'Connection to paypa1.com timed out. (connect timeout=10)'))
+2025-04-16 23:22:19,835 - src.preprocessing.feature_extractor - INFO - Waiting 1 seconds before retry...
+2025-04-16 23:22:30,847 - src.preprocessing.feature_extractor - WARNING - Request attempt 2 failed: HTTPSConnectionPool(host='paypa1.com', port=443): Max retries exceeded with url: /secure/login (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000180C6348B90>, 'Connection to paypa1.com timed out. (connect timeout=10)'))
+2025-04-16 23:22:30,848 - src.preprocessing.feature_extractor - INFO - Waiting 2 seconds before retry...
+2025-04-16 23:22:42,869 - src.preprocessing.feature_extractor - WARNING - Request attempt 3 failed: HTTPSConnectionPool(host='paypa1.com', port=443): Max retries exceeded with url: /secure/login (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000180C6AF9AC0>, 'Connection to paypa1.com timed out. (connect timeout=10)'))
+2025-04-16 23:22:42,870 - src.preprocessing.feature_extractor - ERROR - All 3 attempts failed
+2025-04-16 23:22:42,870 - src.preprocessing.feature_extractor - ERROR - Error extracting HTML features: HTTPSConnectionPool(host='paypa1.com', port=443): Max retries exceeded with url: /secure/login (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000180C6AF9AC0>, 'Connection to paypa1.com timed out. (connect timeout=10)'))
+2025-04-16 23:22:42,871 - src.preprocessing.feature_extractor - INFO - Extraction successful: 23 features extracted
+2025-04-16 23:22:42,871 - __main__ - INFO - Temps d'extraction: 33.14 secondes
+2025-04-16 23:22:42,871 - __main__ - INFO - Caractéristiques extraites: 23
+2025-04-16 23:22:42,871 - __main__ - INFO - 
+Résumé des caractéristiques:
+2025-04-16 23:22:42,873 - __main__ - INFO -   HasCopyright: 0
+2025-04-16 23:22:42,873 - __main__ - INFO -   HasFavicon: 0
+2025-04-16 23:22:42,873 - __main__ - INFO -   HasKeywordCrypto: 0
+2025-04-16 23:22:42,874 - __main__ - INFO -   HasMeta: 0
+2025-04-16 23:22:42,874 - __main__ - INFO -   HasPasswordField: 0
+2025-04-16 23:22:42,874 - __main__ - INFO -   HasSocialNetworking: 0
+2025-04-16 23:22:42,875 - __main__ - INFO -   HasSubmitButton: 0
+2025-04-16 23:22:42,875 - __main__ - INFO -   HasTitle: 0
+2025-04-16 23:22:42,875 - __main__ - INFO -   IsHTTPS: 1
+2025-04-16 23:22:42,875 - __main__ - INFO -   LineLength: 0
+2025-04-16 23:22:42,875 - __main__ - INFO -   NoOfCSS: 0
+2025-04-16 23:22:42,876 - __main__ - INFO -   NoOfDigits: 1
+2025-04-16 23:22:42,876 - __main__ - INFO -   NoOfDots: 1
+2025-04-16 23:22:42,876 - __main__ - INFO -   NoOfHyperlink: 0
+2025-04-16 23:22:42,876 - __main__ - INFO -   NoOfImage: 0
+2025-04-16 23:22:42,876 - __main__ - INFO -   NoOfJS: 0
+2025-04-16 23:22:42,877 - __main__ - INFO -   NoOfObfuscatedChar: 0
+2025-04-16 23:22:42,877 - __main__ - INFO -   NoOfPopup: 0
+2025-04-16 23:22:42,877 - __main__ - INFO -   NoOfQmark: 0
+2025-04-16 23:22:42,877 - __main__ - INFO -   NoOfSubDomain: 0
+2025-04-16 23:22:42,877 - __main__ - INFO -   NoOfURLRedirect: 0
+2025-04-16 23:22:42,878 - __main__ - INFO -   NoOfiFrame: 0
+2025-04-16 23:22:42,878 - __main__ - INFO -   URLLength: 31
+2025-04-16 23:22:42,878 - __main__ - INFO - 
+================================================================================
+Test pour l'URL: http://192.168.1.1
+================================================================================
+2025-04-16 23:22:42,878 - src.preprocessing.feature_extractor - INFO - Features required by the model: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits', 'LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:42,878 - src.preprocessing.feature_extractor - INFO - URL features to extract: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits']
+2025-04-16 23:22:42,879 - src.preprocessing.feature_extractor - INFO - HTML features to extract: ['LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:42,879 - src.preprocessing.feature_extractor - INFO - Extracting features for URL: http://192.168.1.1
+2025-04-16 23:22:43,000 - src.preprocessing.feature_extractor - INFO - Extraction successful: 23 features extracted
+2025-04-16 23:22:43,001 - __main__ - INFO - Temps d'extraction: 0.12 secondes
+2025-04-16 23:22:43,001 - __main__ - INFO - Caractéristiques extraites: 23
+2025-04-16 23:22:43,002 - __main__ - INFO - 
+Résumé des caractéristiques:
+2025-04-16 23:22:43,002 - __main__ - INFO -   HasCopyright: 1
+2025-04-16 23:22:43,002 - __main__ - INFO -   HasFavicon: 1
+2025-04-16 23:22:43,003 - __main__ - INFO -   HasKeywordCrypto: 1
+2025-04-16 23:22:43,003 - __main__ - INFO -   HasMeta: 1
+2025-04-16 23:22:43,003 - __main__ - INFO -   HasPasswordField: 1
+2025-04-16 23:22:43,004 - __main__ - INFO -   HasSocialNetworking: 0
+2025-04-16 23:22:43,004 - __main__ - INFO -   HasSubmitButton: 1
+2025-04-16 23:22:43,004 - __main__ - INFO -   HasTitle: 1
+2025-04-16 23:22:43,005 - __main__ - INFO -   IsHTTPS: 0
+2025-04-16 23:22:43,005 - __main__ - INFO -   LineLength: 6922
+2025-04-16 23:22:43,005 - __main__ - INFO -   NoOfCSS: 3
+2025-04-16 23:22:43,006 - __main__ - INFO -   NoOfDigits: 8
+2025-04-16 23:22:43,006 - __main__ - INFO -   NoOfDots: 3
+2025-04-16 23:22:43,006 - __main__ - INFO -   NoOfHyperlink: 0
+2025-04-16 23:22:43,006 - __main__ - INFO -   NoOfImage: 0
+2025-04-16 23:22:43,007 - __main__ - INFO -   NoOfJS: 6
+2025-04-16 23:22:43,007 - __main__ - INFO -   NoOfObfuscatedChar: 0
+2025-04-16 23:22:43,007 - __main__ - INFO -   NoOfPopup: 4
+2025-04-16 23:22:43,008 - __main__ - INFO -   NoOfQmark: 0
+2025-04-16 23:22:43,008 - __main__ - INFO -   NoOfSubDomain: 0
+2025-04-16 23:22:43,008 - __main__ - INFO -   NoOfURLRedirect: 3
+2025-04-16 23:22:43,008 - __main__ - INFO -   NoOfiFrame: 0
+2025-04-16 23:22:43,008 - __main__ - INFO -   URLLength: 18
+2025-04-16 23:22:43,009 - __main__ - INFO - 
+================================================================================
+Test pour l'URL: https://bit.ly/3rGH7q
+================================================================================
+2025-04-16 23:22:43,009 - src.preprocessing.feature_extractor - INFO - Features required by the model: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits', 'LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:43,009 - src.preprocessing.feature_extractor - INFO - URL features to extract: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits']
+2025-04-16 23:22:43,009 - src.preprocessing.feature_extractor - INFO - HTML features to extract: ['LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:43,010 - src.preprocessing.feature_extractor - INFO - Extracting features for URL: https://bit.ly/3rGH7q
+2025-04-16 23:22:43,603 - src.preprocessing.feature_extractor - INFO - Extraction successful: 23 features extracted
+2025-04-16 23:22:43,604 - __main__ - INFO - Temps d'extraction: 0.59 secondes
+2025-04-16 23:22:43,604 - __main__ - INFO - Caractéristiques extraites: 23
+2025-04-16 23:22:43,604 - __main__ - INFO - 
+Résumé des caractéristiques:
+2025-04-16 23:22:43,604 - __main__ - INFO -   HasCopyright: 0
+2025-04-16 23:22:43,605 - __main__ - INFO -   HasFavicon: 1
+2025-04-16 23:22:43,605 - __main__ - INFO -   HasKeywordCrypto: 0
+2025-04-16 23:22:43,605 - __main__ - INFO -   HasMeta: 1
+2025-04-16 23:22:43,605 - __main__ - INFO -   HasPasswordField: 0
+2025-04-16 23:22:43,605 - __main__ - INFO -   HasSocialNetworking: 0
+2025-04-16 23:22:43,606 - __main__ - INFO -   HasSubmitButton: 0
+2025-04-16 23:22:43,606 - __main__ - INFO -   HasTitle: 1
+2025-04-16 23:22:43,606 - __main__ - INFO -   IsHTTPS: 1
+2025-04-16 23:22:43,606 - __main__ - INFO -   LineLength: 217
+2025-04-16 23:22:43,606 - __main__ - INFO -   NoOfCSS: 1
+2025-04-16 23:22:43,606 - __main__ - INFO -   NoOfDigits: 2
+2025-04-16 23:22:43,607 - __main__ - INFO -   NoOfDots: 1
+2025-04-16 23:22:43,607 - __main__ - INFO -   NoOfHyperlink: 4
+2025-04-16 23:22:43,607 - __main__ - INFO -   NoOfImage: 2
+2025-04-16 23:22:43,607 - __main__ - INFO -   NoOfJS: 1
+2025-04-16 23:22:43,608 - __main__ - INFO -   NoOfObfuscatedChar: 0
+2025-04-16 23:22:43,608 - __main__ - INFO -   NoOfPopup: 0
+2025-04-16 23:22:43,608 - __main__ - INFO -   NoOfQmark: 0
+2025-04-16 23:22:43,608 - __main__ - INFO -   NoOfSubDomain: 0
+2025-04-16 23:22:43,608 - __main__ - INFO -   NoOfURLRedirect: 1
+2025-04-16 23:22:43,608 - __main__ - INFO -   NoOfiFrame: 0
+2025-04-16 23:22:43,608 - __main__ - INFO -   URLLength: 21
+2025-04-16 23:22:43,610 - __main__ - INFO - 
+================================================================================
+Test pour l'URL: https://secure-banking.com/%63%6C%69%65%6E%74
+================================================================================
+2025-04-16 23:22:43,610 - src.preprocessing.feature_extractor - INFO - Features required by the model: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits', 'LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:43,610 - src.preprocessing.feature_extractor - INFO - URL features to extract: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits']
+2025-04-16 23:22:43,611 - src.preprocessing.feature_extractor - INFO - HTML features to extract: ['LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:22:43,611 - src.preprocessing.feature_extractor - INFO - Extracting features for URL: https://secure-banking.com/%63%6C%69%65%6E%74
+2025-04-16 23:22:53,822 - src.preprocessing.feature_extractor - WARNING - Request attempt 1 failed: HTTPSConnectionPool(host='secure-banking.com', port=443): Max retries exceeded with url: /client (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000180C6B66900>, 'Connection to secure-banking.com timed out. (connect timeout=10)'))
+2025-04-16 23:22:53,822 - src.preprocessing.feature_extractor - INFO - Waiting 1 seconds before retry...
+2025-04-16 23:23:04,848 - src.preprocessing.feature_extractor - WARNING - Request attempt 2 failed: HTTPSConnectionPool(host='secure-banking.com', port=443): Max retries exceeded with url: /client (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000180C6B7D880>, 'Connection to secure-banking.com timed out. (connect timeout=10)'))
+2025-04-16 23:23:04,849 - src.preprocessing.feature_extractor - INFO - Waiting 2 seconds before retry...
+2025-04-16 23:23:16,860 - src.preprocessing.feature_extractor - WARNING - Request attempt 3 failed: HTTPSConnectionPool(host='secure-banking.com', port=443): Max retries exceeded with url: /client (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000180C6B7EC00>, 'Connection to secure-banking.com timed out. (connect timeout=10)'))
+2025-04-16 23:23:16,861 - src.preprocessing.feature_extractor - ERROR - All 3 attempts failed
+2025-04-16 23:23:16,862 - src.preprocessing.feature_extractor - ERROR - Error extracting HTML features: HTTPSConnectionPool(host='secure-banking.com', port=443): Max retries exceeded with url: /client (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000180C6B7EC00>, 'Connection to secure-banking.com timed out. (connect timeout=10)'))
+2025-04-16 23:23:16,862 - src.preprocessing.feature_extractor - INFO - Extraction successful: 23 features extracted
+2025-04-16 23:23:16,863 - __main__ - INFO - Temps d'extraction: 33.25 secondes
+2025-04-16 23:23:16,863 - __main__ - INFO - Caractéristiques extraites: 23
+2025-04-16 23:23:16,865 - __main__ - INFO - 
+Résumé des caractéristiques:
+2025-04-16 23:23:16,865 - __main__ - INFO -   HasCopyright: 0
+2025-04-16 23:23:16,866 - __main__ - INFO -   HasFavicon: 0
+2025-04-16 23:23:16,868 - __main__ - INFO -   HasKeywordCrypto: 0
+2025-04-16 23:23:16,868 - __main__ - INFO -   HasMeta: 0
+2025-04-16 23:23:16,869 - __main__ - INFO -   HasPasswordField: 0
+2025-04-16 23:23:16,870 - __main__ - INFO -   HasSocialNetworking: 0
+2025-04-16 23:23:16,870 - __main__ - INFO -   HasSubmitButton: 0
+2025-04-16 23:23:16,871 - __main__ - INFO -   HasTitle: 0
+2025-04-16 23:23:16,871 - __main__ - INFO -   IsHTTPS: 1
+2025-04-16 23:23:16,871 - __main__ - INFO -   LineLength: 0
+2025-04-16 23:23:16,872 - __main__ - INFO -   NoOfCSS: 0
+2025-04-16 23:23:16,872 - __main__ - INFO -   NoOfDigits: 10
+2025-04-16 23:23:16,872 - __main__ - INFO -   NoOfDots: 1
+2025-04-16 23:23:16,873 - __main__ - INFO -   NoOfHyperlink: 0
+2025-04-16 23:23:16,873 - __main__ - INFO -   NoOfImage: 0
+2025-04-16 23:23:16,873 - __main__ - INFO -   NoOfJS: 0
+2025-04-16 23:23:16,873 - __main__ - INFO -   NoOfObfuscatedChar: 6
+2025-04-16 23:23:16,874 - __main__ - INFO -   NoOfPopup: 0
+2025-04-16 23:23:16,874 - __main__ - INFO -   NoOfQmark: 0
+2025-04-16 23:23:16,874 - __main__ - INFO -   NoOfSubDomain: 0
+2025-04-16 23:23:16,875 - __main__ - INFO -   NoOfURLRedirect: 0
+2025-04-16 23:23:16,875 - __main__ - INFO -   NoOfiFrame: 0
+2025-04-16 23:23:16,876 - __main__ - INFO -   URLLength: 45
+2025-04-16 23:23:16,876 - __main__ - INFO - 
+================================================================================
+Test pour l'URL: non-existent-domain.xyz
+================================================================================
+2025-04-16 23:23:16,876 - src.preprocessing.feature_extractor - INFO - Features required by the model: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits', 'LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:23:16,877 - src.preprocessing.feature_extractor - INFO - URL features to extract: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits']
+2025-04-16 23:23:16,877 - src.preprocessing.feature_extractor - INFO - HTML features to extract: ['LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:23:16,878 - src.preprocessing.feature_extractor - INFO - Extracting features for URL: non-existent-domain.xyz
+2025-04-16 23:23:16,937 - src.preprocessing.feature_extractor - WARNING - Request attempt 1 failed: HTTPConnectionPool(host='non-existent-domain.xyz', port=80): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x00000180C6B7F620>: Failed to resolve 'non-existent-domain.xyz' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:23:16,938 - src.preprocessing.feature_extractor - INFO - Waiting 1 seconds before retry...
+2025-04-16 23:23:17,942 - src.preprocessing.feature_extractor - WARNING - Request attempt 2 failed: HTTPConnectionPool(host='non-existent-domain.xyz', port=80): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x00000180C6B7F9B0>: Failed to resolve 'non-existent-domain.xyz' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:23:17,942 - src.preprocessing.feature_extractor - INFO - Waiting 2 seconds before retry...
+2025-04-16 23:23:19,947 - src.preprocessing.feature_extractor - WARNING - Request attempt 3 failed: HTTPConnectionPool(host='non-existent-domain.xyz', port=80): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x00000180C6B7FD40>: Failed to resolve 'non-existent-domain.xyz' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:23:19,948 - src.preprocessing.feature_extractor - ERROR - All 3 attempts failed
+2025-04-16 23:23:19,948 - src.preprocessing.feature_extractor - ERROR - Error extracting HTML features: HTTPConnectionPool(host='non-existent-domain.xyz', port=80): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x00000180C6B7FD40>: Failed to resolve 'non-existent-domain.xyz' ([Errno 11001] getaddrinfo failed)"))
+2025-04-16 23:23:19,949 - src.preprocessing.feature_extractor - INFO - Extraction successful: 23 features extracted
+2025-04-16 23:23:19,949 - __main__ - INFO - Temps d'extraction: 3.07 secondes
+2025-04-16 23:23:19,949 - __main__ - INFO - Caractéristiques extraites: 23
+2025-04-16 23:23:19,950 - __main__ - INFO - 
+Résumé des caractéristiques:
+2025-04-16 23:23:19,950 - __main__ - INFO -   HasCopyright: 0
+2025-04-16 23:23:19,951 - __main__ - INFO -   HasFavicon: 0
+2025-04-16 23:23:19,951 - __main__ - INFO -   HasKeywordCrypto: 0
+2025-04-16 23:23:19,951 - __main__ - INFO -   HasMeta: 0
+2025-04-16 23:23:19,952 - __main__ - INFO -   HasPasswordField: 0
+2025-04-16 23:23:19,952 - __main__ - INFO -   HasSocialNetworking: 0
+2025-04-16 23:23:19,953 - __main__ - INFO -   HasSubmitButton: 0
+2025-04-16 23:23:19,953 - __main__ - INFO -   HasTitle: 0
+2025-04-16 23:23:19,953 - __main__ - INFO -   IsHTTPS: 0
+2025-04-16 23:23:19,954 - __main__ - INFO -   LineLength: 0
+2025-04-16 23:23:19,954 - __main__ - INFO -   NoOfCSS: 0
+2025-04-16 23:23:19,955 - __main__ - INFO -   NoOfDigits: 0
+2025-04-16 23:23:19,955 - __main__ - INFO -   NoOfDots: 1
+2025-04-16 23:23:19,955 - __main__ - INFO -   NoOfHyperlink: 0
+2025-04-16 23:23:19,956 - __main__ - INFO -   NoOfImage: 0
+2025-04-16 23:23:19,956 - __main__ - INFO -   NoOfJS: 0
+2025-04-16 23:23:19,956 - __main__ - INFO -   NoOfObfuscatedChar: 0
+2025-04-16 23:23:19,957 - __main__ - INFO -   NoOfPopup: 0
+2025-04-16 23:23:19,957 - __main__ - INFO -   NoOfQmark: 0
+2025-04-16 23:23:19,957 - __main__ - INFO -   NoOfSubDomain: 0
+2025-04-16 23:23:19,957 - __main__ - INFO -   NoOfURLRedirect: 0
+2025-04-16 23:23:19,957 - __main__ - INFO -   NoOfiFrame: 0
+2025-04-16 23:23:19,958 - __main__ - INFO -   URLLength: 30
+2025-04-16 23:23:19,958 - __main__ - INFO - 
+================================================================================
+Test pour l'URL: https://website.com/login.php?redirectTo=https://malicious.com
+================================================================================
+2025-04-16 23:23:19,958 - src.preprocessing.feature_extractor - INFO - Features required by the model: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits', 'LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:23:19,959 - src.preprocessing.feature_extractor - INFO - URL features to extract: ['IsHTTPS', 'URLLength', 'NoOfSubDomain', 'NoOfDots', 'NoOfObfuscatedChar', 'NoOfQmark', 'NoOfDigits']
+2025-04-16 23:23:19,959 - src.preprocessing.feature_extractor - INFO - HTML features to extract: ['LineLength', 'HasTitle', 'HasMeta', 'HasFavicon', 'HasCopyright', 'HasSocialNetworking', 'HasPasswordField', 'HasSubmitButton', 'HasKeywordCrypto', 'NoOfPopup', 'NoOfiFrame', 'NoOfImage', 'NoOfJS', 'NoOfCSS', 'NoOfURLRedirect', 'NoOfHyperlink']
+2025-04-16 23:23:19,959 - src.preprocessing.feature_extractor - INFO - Extracting features for URL: https://website.com/login.php?redirectTo=https://malicious.com
+2025-04-16 23:23:20,496 - src.preprocessing.feature_extractor - INFO - Extraction successful: 23 features extracted
+2025-04-16 23:23:20,497 - __main__ - INFO - Temps d'extraction: 0.54 secondes
+2025-04-16 23:23:20,498 - __main__ - INFO - Caractéristiques extraites: 23
+2025-04-16 23:23:20,498 - __main__ - INFO - 
+Résumé des caractéristiques:
+2025-04-16 23:23:20,498 - __main__ - INFO -   HasCopyright: 0
+2025-04-16 23:23:20,498 - __main__ - INFO -   HasFavicon: 0
+2025-04-16 23:23:20,498 - __main__ - INFO -   HasKeywordCrypto: 0
+2025-04-16 23:23:20,499 - __main__ - INFO -   HasMeta: 1
+2025-04-16 23:23:20,499 - __main__ - INFO -   HasPasswordField: 0
+2025-04-16 23:23:20,499 - __main__ - INFO -   HasSocialNetworking: 0
+2025-04-16 23:23:20,500 - __main__ - INFO -   HasSubmitButton: 0
+2025-04-16 23:23:20,500 - __main__ - INFO -   HasTitle: 1
+2025-04-16 23:23:20,500 - __main__ - INFO -   IsHTTPS: 1
+2025-04-16 23:23:20,500 - __main__ - INFO -   LineLength: 93
+2025-04-16 23:23:20,501 - __main__ - INFO -   NoOfCSS: 2
+2025-04-16 23:23:20,501 - __main__ - INFO -   NoOfDigits: 0
+2025-04-16 23:23:20,501 - __main__ - INFO -   NoOfDots: 3
+2025-04-16 23:23:20,501 - __main__ - INFO -   NoOfHyperlink: 1
+2025-04-16 23:23:20,502 - __main__ - INFO -   NoOfImage: 0
+2025-04-16 23:23:20,502 - __main__ - INFO -   NoOfJS: 3
+2025-04-16 23:23:20,502 - __main__ - INFO -   NoOfObfuscatedChar: 0
+2025-04-16 23:23:20,503 - __main__ - INFO -   NoOfPopup: 1
+2025-04-16 23:23:20,503 - __main__ - INFO -   NoOfQmark: 1
+2025-04-16 23:23:20,503 - __main__ - INFO -   NoOfSubDomain: 0
+2025-04-16 23:23:20,503 - __main__ - INFO -   NoOfURLRedirect: 0
+2025-04-16 23:23:20,504 - __main__ - INFO -   NoOfiFrame: 0
+2025-04-16 23:23:20,504 - __main__ - INFO -   URLLength: 62
+2025-04-16 23:23:20,506 - __main__ - INFO - 
+
+================================================================================
+2025-04-16 23:23:20,506 - __main__ - INFO - RÉSUMÉ DES TESTS
+2025-04-16 23:23:20,508 - __main__ - INFO - ================================================================================
+2025-04-16 23:23:20,508 - __main__ - INFO - Tests réussis: 10/10 (100.0%)
+2025-04-16 23:23:20,546 - __main__ - INFO - 
+Fin des tests d'extraction de caractéristiques

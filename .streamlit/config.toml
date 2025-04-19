@@ -1,0 +1,5 @@
+#[ui]
+#hideSidebarNav = true
+
+[client]
+showSidebarNavigation = false  # ✅ Optional, for some versions
