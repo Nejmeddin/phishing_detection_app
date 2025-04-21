@@ -140,4 +140,4 @@ Pour toute question ou suggestion, n'hésitez pas à me contacter.
 
 ---
 
-Développé avec Nejmeddin Ben Maatoug , Informatic ingeneer
+Développé avec Nejmeddin Ben Maatoug , Informatic ingeneer.

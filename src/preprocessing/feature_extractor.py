@@ -11,11 +11,10 @@ import numpy as np
 import requests
 from typing import Dict, List, Union, Optional, Set, Any
 import tldextract
-import socket
-import ssl
-from bs4 import BeautifulSoup
+import whois
 from datetime import datetime
 import time
+from bs4 import BeautifulSoup
 
 # Logging configuration
 logging.basicConfig(
@@ -23,10 +22,76 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Liste des mots sensibles qui peuvent indiquer du phishing
+SENSITIVE_WORDS = [
+    "account",
+    "confirm",
+    "banking",
+    "secure",
+    "ebyisapi",
+    "webscr",
+    "signin",
+    "mail",
+    "install",
+    "toolbar",
+    "backup",
+    "paypal",
+    "password",
+    "username",
+    "verify",
+    "update",
+    "login",
+    "support",
+    "billing",
+    "transaction",
+    "security",
+    "payment",
+    "verify",
+    "online",
+    "customer",
+    "service",
+    "accountupdate",
+    "verification",
+    "important",
+    "confidential",
+    "limited",
+    "access",
+    "securitycheck",
+    "verifyaccount",
+    "information",
+    "change",
+    "notice",
+    "myaccount",
+    "updateinfo",
+    "loginsecure",
+    "protect",
+    "transaction",
+    "identity",
+    "member",
+    "personal",
+    "actionrequired",
+    "loginverify",
+    "validate",
+    "paymentupdate",
+    "urgent",
+]
 
-class WebFeatureExtractor:
+# Services de raccourcissement d'URLs
+SHORTENING_SERVICES = (
+    r"bit\.ly|goo\.gl|shorte\.st|go2l\.ink|x\.co|ow\.ly|t\.co|tinyurl|tr\.im|is\.gd|cli\.gs|"
+    r"yfrog\.com|migre\.me|ff\.im|tiny\.cc|url4\.eu|twit\.ac|su\.pr|twurl\.nl|snipurl\.com|"
+    r"short\.to|BudURL\.com|ping\.fm|post\.ly|Just\.as|bkite\.com|snipr\.com|fic\.kr|loopt\.us|"
+    r"doiop\.com|short\.ie|kl\.am|wp\.me|rubyurl\.com|om\.ly|to\.ly|bit\.do|t\.co|lnkd\.in|db\.tt|"
+    r"qr\.ae|adf\.ly|goo\.gl|bitly\.com|cur\.lv|tinyurl\.com|ow\.ly|bit\.ly|ity\.im|q\.gs|is\.gd|"
+    r"po\.st|bc\.vc|twitthis\.com|u\.to|j\.mp|buzurl\.com|cutt\.us|u\.bb|yourls\.org|x\.co|"
+    r"prettylinkpro\.com|scrnch\.me|filoops\.info|vzturl\.com|qr\.net|1url\.com|tweez\.me|v\.gd|"
+    r"tr\.im|link\.zip\.net"
+)
+
+
+class EnhancedFeatureExtractor:
     """
-    Class to extract relevant features from URLs and HTML content
+    Class to extract enhanced features from URLs and HTML content
     for phishing detection.
     """
 
@@ -66,116 +131,9 @@ class WebFeatureExtractor:
             "NoOfCSS",
             "NoOfURLRedirect",
             "NoOfHyperlink",
+            "IsTinyURL",
+            "HasSuspiciousKeyword",
         ]
-
-        # Verify that all required features are in the expected list
-        missing = set(self.required_features) - set(self.expected_features)
-        if missing:
-            logger.warning(
-                f"Some required features are not in the expected list: {missing}"
-            )
-
-        # Keywords for detecting specific features
-        self.bank_keywords = [
-            "bank",
-            "credit",
-            "debit",
-            "account",
-            "card",
-            "balance",
-            "transfer",
-        ]
-        self.pay_keywords = ["pay", "payment", "transaction", "bill", "invoice"]
-        self.crypto_keywords = [
-            "crypto",
-            "bitcoin",
-            "ethereum",
-            "wallet",
-            "blockchain",
-            "token",
-        ]
-        self.social_networks = [
-            "facebook",
-            "twitter",
-            "instagram",
-            "linkedin",
-            "youtube",
-            "pinterest",
-        ]
-
-        # Classify features as URL and HTML
-        self.url_features = [
-            "IsHTTPS",
-            "IsDomainIP",
-            "URLLength",
-            "NoOfSubDomain",
-            "NoOfDots",
-            "NoOfObfuscatedChar",
-            "NoOfEqual",
-            "NoOfQmark",
-            "NoOfAmp",
-            "NoOfDigits",
-        ]
-
-        self.html_features = [
-            "LineLength",
-            "HasTitle",
-            "HasMeta",
-            "HasFavicon",
-            "HasExternalFormSubmit",
-            "HasCopyright",
-            "HasSocialNetworking",
-            "HasPasswordField",
-            "HasSubmitButton",
-            "HasKeywordBank",
-            "HasKeywordPay",
-            "HasKeywordCrypto",
-            "NoOfPopup",
-            "NoOfiFrame",
-            "NoOfImage",
-            "NoOfJS",
-            "NoOfCSS",
-            "NoOfURLRedirect",
-            "NoOfHyperlink",
-        ]
-
-        # Create specific lists for required features
-        self.required_url_features = [
-            f for f in self.url_features if f in self.required_features
-        ]
-        self.required_html_features = [
-            f for f in self.html_features if f in self.required_features
-        ]
-
-        logger.info(f"URL features to extract: {self.required_url_features}")
-        logger.info(f"HTML features to extract: {self.required_html_features}")
-
-        # Dictionary of default values for each feature
-        self.default_values = {
-            "IsHTTPS": 0,  # Default: not HTTPS
-            "URLLength": 0,  # Default: zero length
-            "NoOfSubDomain": 0,  # Default: no subdomains
-            "NoOfDots": 0,  # Default: no dots
-            "NoOfObfuscatedChar": 0,  # Default: no obfuscated chars
-            "NoOfQmark": 0,  # Default: no question marks
-            "NoOfDigits": 0,  # Default: no digits
-            "LineLength": 0,  # Default: no lines
-            "HasTitle": 0,  # Default: no title
-            "HasMeta": 0,  # Default: no meta
-            "HasFavicon": 0,  # Default: no favicon
-            "HasCopyright": 0,  # Default: no copyright
-            "HasSocialNetworking": 0,  # Default: no social networking
-            "HasPasswordField": 0,  # Default: no password field
-            "HasSubmitButton": 0,  # Default: no submit button
-            "HasKeywordCrypto": 0,  # Default: no crypto keywords
-            "NoOfPopup": 0,  # Default: no popups
-            "NoOfiFrame": 0,  # Default: no iframes
-            "NoOfImage": 0,  # Default: no images
-            "NoOfJS": 0,  # Default: no JS
-            "NoOfCSS": 0,  # Default: no CSS
-            "NoOfURLRedirect": 0,  # Default: no redirects
-            "NoOfHyperlink": 0,  # Default: no hyperlinks
-        }
 
         # Setup a request session with defaults
         self.session = requests.Session()
@@ -185,10 +143,39 @@ class WebFeatureExtractor:
             }
         )
         # Set timeout and retry strategy
-        self.timeout = 10  # seconds
-        self.max_retries = 2
+        self.timeout = 5  # seconds
+        self.max_retries = 1
 
-    def extract_features(self, url: str) -> Dict[str, Union[int, float, str]]:
+        # Dictionary of default values for each feature
+        self.default_values = {
+            "IsHTTPS": 0,
+            "URLLength": 0,
+            "NoOfSubDomain": 0,
+            "NoOfDots": 0,
+            "NoOfObfuscatedChar": 0,
+            "NoOfQmark": 0,
+            "NoOfDigits": 0,
+            "LineLength": 0,
+            "HasTitle": 0,
+            "HasMeta": 0,
+            "HasFavicon": 0,
+            "HasCopyright": 0,
+            "HasSocialNetworking": 0,
+            "HasPasswordField": 0,
+            "HasSubmitButton": 0,
+            "HasKeywordCrypto": 0,
+            "NoOfPopup": 0,
+            "NoOfiFrame": 0,
+            "NoOfImage": 0,
+            "NoOfJS": 0,
+            "NoOfCSS": 0,
+            "NoOfURLRedirect": 0,
+            "NoOfHyperlink": 0,
+            "IsTinyURL": 0,
+            "HasSuspiciousKeyword": 0,
+        }
+
+    def extract_features(self, url: str) -> Dict[str, Any]:
         """
         Extract all features from a URL and its HTML content.
 
@@ -218,17 +205,11 @@ class WebFeatureExtractor:
             features.update(self._extract_url_features(url, parsed_url, extract_result))
 
             # 2. Extract HTML features with retries if needed
-            if self.required_html_features:
-                try:
-                    html_features = self._extract_html_features_with_retry(url)
-                    features.update(html_features)
-                except Exception as e:
-                    logger.error(f"Error extracting HTML features: {str(e)}")
-                    # Generate default values for HTML features
-                    features.update(self._generate_default_html_features())
+            html_features = self._extract_html_features_with_retry(url)
+            features.update(html_features)
 
             # 3. Ensure all required features are present with appropriate defaults
-            for feature in self.required_features:
+            for feature in self.expected_features:
                 if feature not in features:
                     logger.warning(f"Feature {feature} missing, using default value")
                     features[feature] = self.default_values.get(feature, 0)
@@ -259,35 +240,79 @@ class WebFeatureExtractor:
         """
         features = {}
 
-        # Calculate required URL features
-        if "IsHTTPS" in self.required_url_features:
-            features["IsHTTPS"] = 1 if parsed_url.scheme == "https" else 0
+        # IsHTTPS
+        features["IsHTTPS"] = 1 if parsed_url.scheme == "https" else 0
 
-        if "URLLength" in self.required_url_features:
-            features["URLLength"] = len(url)
+        # URLLength
+        features["URLLength"] = len(url)
 
-        if "IsDomainIP" in self.required_url_features:
-            features["IsDomainIP"] = 1 if self._is_ip_address(parsed_url.netloc) else 0
+        # Sous-domaines
+        subdomain_count = (
+            len(extract_result.subdomain.split(".")) if extract_result.subdomain else 0
+        )
+        features["NoOfSubDomain"] = subdomain_count
 
-        if "NoOfSubDomain" in self.required_url_features:
-            subdomain_count = (
-                len(extract_result.subdomain.split("."))
-                if extract_result.subdomain
-                else 0
-            )
-            features["NoOfSubDomain"] = subdomain_count
+        # Compter les points
+        features["NoOfDots"] = url.count(".")
 
-        if "NoOfDots" in self.required_url_features:
-            features["NoOfDots"] = url.count(".")
+        # Caractères obfusqués
+        features["NoOfObfuscatedChar"] = len(re.findall(r"%[0-9a-fA-F]{2}", url))
 
-        if "NoOfObfuscatedChar" in self.required_url_features:
-            features["NoOfObfuscatedChar"] = len(re.findall(r"%[0-9a-fA-F]{2}", url))
+        # Points d'interrogation
+        features["NoOfQmark"] = url.count("?")
 
-        if "NoOfQmark" in self.required_url_features:
-            features["NoOfQmark"] = url.count("?")
+        # Chiffres dans l'URL
+        features["NoOfDigits"] = sum(c.isdigit() for c in url)
 
-        if "NoOfDigits" in self.required_url_features:
-            features["NoOfDigits"] = sum(c.isdigit() for c in url)
+        # URL raccourcie
+        features["IsTinyURL"] = 1 if re.search(SHORTENING_SERVICES, url) else 0
+
+        # Mots sensibles dans le domaine
+        domain = parsed_url.netloc
+        has_sensitive_word = 0
+        for word in SENSITIVE_WORDS:
+            if word in domain.lower():
+                has_sensitive_word = 1
+                break
+        features["HasSuspiciousKeyword"] = has_sensitive_word
+
+        # Tentative d'obtenir des informations sur le domaine
+        try:
+            domain_info = whois.whois(parsed_url.netloc)
+
+            # Âge du domaine
+            domain_age = 1  # Par défaut, considéré comme récent (suspect)
+            if (
+                domain_info
+                and domain_info.creation_date
+                and domain_info.expiration_date
+            ):
+                try:
+                    # Gestion des cas où la date est une liste
+                    creation_date = domain_info.creation_date
+                    if isinstance(creation_date, list):
+                        creation_date = creation_date[0]
+
+                    expiration_date = domain_info.expiration_date
+                    if isinstance(expiration_date, list):
+                        expiration_date = expiration_date[0]
+
+                    # Calculer l'âge en jours
+                    if isinstance(creation_date, datetime) and isinstance(
+                        expiration_date, datetime
+                    ):
+                        age_days = abs((expiration_date - creation_date).days)
+                        # Considérer comme légitime si le domaine a plus de 6 mois
+                        domain_age = 0 if (age_days / 30) >= 6 else 1
+                except Exception as e:
+                    logger.warning(
+                        f"Erreur lors du calcul de l'âge du domaine: {str(e)}"
+                    )
+
+            features["DomainAge"] = domain_age
+
+        except Exception as e:
+            logger.warning(f"Impossible d'obtenir les informations whois: {str(e)}")
 
         return features
 
@@ -301,152 +326,170 @@ class WebFeatureExtractor:
         Returns:
             Dict: Features extracted from the HTML
         """
-        # Initialize empty features dict
+        # Caractéristiques HTML par défaut (en cas d'échec)
+        default_html_features = {
+            "LineLength": 0,
+            "HasTitle": 0,
+            "HasMeta": 0,
+            "HasFavicon": 0,
+            "HasCopyright": 0,
+            "HasSocialNetworking": 0,
+            "HasPasswordField": 0,
+            "HasSubmitButton": 0,
+            "HasKeywordCrypto": 0,
+            "NoOfPopup": 0,
+            "NoOfiFrame": 0,
+            "NoOfImage": 0,
+            "NoOfJS": 0,
+            "NoOfCSS": 0,
+            "NoOfURLRedirect": 0,
+            "NoOfHyperlink": 0,
+        }
+
         features = {}
 
-        # If no HTML features are required, return an empty dictionary
-        if not self.required_html_features:
-            return features
+        try:
+            # Implement retry mechanism
+            for attempt in range(self.max_retries + 1):
+                try:
+                    response = self.session.get(url, timeout=self.timeout)
+                    html_content = response.text
+                    soup = BeautifulSoup(html_content, "html.parser")
 
-        # Implement retry mechanism
-        for attempt in range(self.max_retries + 1):
-            try:
-                response = self.session.get(url, timeout=self.timeout)
-                html_content = response.text
-                soup = BeautifulSoup(html_content, "html.parser")
+                    # Longueur du contenu
+                    features["LineLength"] = len(html_content.splitlines())
 
-                # Extract all HTML features
-                features = self._process_html_content(html_content, soup)
+                    # Présence d'un titre
+                    features["HasTitle"] = 1 if soup.title else 0
 
-                # If we got here, we succeeded
-                break
+                    # Présence de balises meta
+                    features["HasMeta"] = 1 if soup.find_all("meta") else 0
 
-            except requests.exceptions.RequestException as e:
-                logger.warning(f"Request attempt {attempt+1} failed: {str(e)}")
-                if attempt < self.max_retries:
-                    # Wait before retrying (exponential backoff)
-                    wait_time = 2**attempt
-                    logger.info(f"Waiting {wait_time} seconds before retry...")
-                    time.sleep(wait_time)
-                else:
-                    logger.error(f"All {self.max_retries+1} attempts failed")
-                    raise
+                    # Favicon
+                    has_favicon = 0
+                    links = soup.find_all("link")
+                    for link in links:
+                        rel = link.get("rel", "")
+                        if isinstance(rel, list):
+                            rel = " ".join(rel)
+                        if "icon" in rel.lower():
+                            has_favicon = 1
+                            break
+                    features["HasFavicon"] = has_favicon
+
+                    # Copyright
+                    features["HasCopyright"] = (
+                        1
+                        if "©" in html_content or "copyright" in html_content.lower()
+                        else 0
+                    )
+
+                    # Réseaux sociaux
+                    social_networks = [
+                        "facebook",
+                        "twitter",
+                        "instagram",
+                        "linkedin",
+                        "youtube",
+                        "pinterest",
+                    ]
+                    has_social = 0
+                    for network in social_networks:
+                        if network in html_content.lower():
+                            has_social = 1
+                            break
+                    features["HasSocialNetworking"] = has_social
+
+                    # Champ de mot de passe
+                    features["HasPasswordField"] = (
+                        1 if soup.find_all("input", {"type": "password"}) else 0
+                    )
+
+                    # Bouton de soumission
+                    submit_buttons = soup.find_all("input", {"type": "submit"})
+                    submit_buttons.extend(soup.find_all("button", {"type": "submit"}))
+                    features["HasSubmitButton"] = 1 if submit_buttons else 0
+
+                    # Mots-clés crypto
+                    crypto_keywords = [
+                        "crypto",
+                        "bitcoin",
+                        "ethereum",
+                        "wallet",
+                        "blockchain",
+                        "token",
+                    ]
+                    has_crypto = 0
+                    for keyword in crypto_keywords:
+                        if keyword in html_content.lower():
+                            has_crypto = 1
+                            break
+                    features["HasKeywordCrypto"] = has_crypto
+
+                    # Popups
+                    popups = len(
+                        soup.find_all(
+                            "script", string=re.compile("window.open|popup|alert")
+                        )
+                    )
+                    features["NoOfPopup"] = popups
+
+                    # iFrames
+                    features["NoOfiFrame"] = len(soup.find_all("iframe"))
+
+                    # Images
+                    features["NoOfImage"] = len(soup.find_all("img"))
+
+                    # JavaScript
+                    features["NoOfJS"] = len(soup.find_all("script"))
+
+                    # CSS
+                    css_count = len(soup.find_all("link", {"rel": "stylesheet"}))
+                    css_count += len(soup.find_all("style"))
+                    features["NoOfCSS"] = css_count
+
+                    # Redirections URL
+                    redirects = 0
+                    redirect_patterns = [
+                        "window.location",
+                        "document.location",
+                        ".href",
+                    ]
+                    scripts = soup.find_all("script")
+                    for script in scripts:
+                        if script.string:
+                            for pattern in redirect_patterns:
+                                if pattern in script.string:
+                                    redirects += 1
+                    features["NoOfURLRedirect"] = redirects
+
+                    # Hyperliens
+                    features["NoOfHyperlink"] = len(soup.find_all("a"))
+
+                    # Si on arrive ici, l'extraction a réussi
+                    break
+
+                except Exception as e:
+                    logger.warning(f"Request attempt {attempt+1} failed: {str(e)}")
+                    if attempt < self.max_retries:
+                        # Wait before retrying (exponential backoff)
+                        wait_time = 2**attempt
+                        logger.info(f"Waiting {wait_time} seconds before retry...")
+                        time.sleep(wait_time)
+                    else:
+                        logger.error(f"All {self.max_retries+1} attempts failed")
+                        features.update(default_html_features)
+
+        except Exception as e:
+            logger.error(f"Error extracting HTML features: {str(e)}")
+            features.update(default_html_features)
+
+        # Vérifier que toutes les caractéristiques HTML sont présentes
+        for feature, default_value in default_html_features.items():
+            if feature not in features:
+                features[feature] = default_value
 
         return features
-
-    def _process_html_content(self, html_content, soup):
-        """
-        Process HTML content to extract features.
-
-        Args:
-            html_content: The HTML content
-            soup: The BeautifulSoup object
-
-        Returns:
-            Dict: Features extracted from the HTML
-        """
-        features = {}
-
-        # Extract features as needed
-        if "LineLength" in self.required_html_features:
-            features["LineLength"] = len(html_content.splitlines())
-
-        if "HasTitle" in self.required_html_features:
-            features["HasTitle"] = 1 if soup.title else 0
-
-        if "HasMeta" in self.required_html_features:
-            features["HasMeta"] = 1 if soup.find_all("meta") else 0
-
-        if "HasFavicon" in self.required_html_features:
-            has_favicon = 0
-            links = soup.find_all("link")
-            for link in links:
-                rel = link.get("rel", "")
-                if isinstance(rel, list):
-                    rel = " ".join(rel)
-                if "icon" in rel.lower():
-                    has_favicon = 1
-                    break
-            features["HasFavicon"] = has_favicon
-
-        if "HasCopyright" in self.required_html_features:
-            has_copyright = 0
-            if "©" in html_content or "copyright" in html_content.lower():
-                has_copyright = 1
-            features["HasCopyright"] = has_copyright
-
-        if "HasSocialNetworking" in self.required_html_features:
-            has_social = 0
-            for network in self.social_networks:
-                if network in html_content.lower():
-                    has_social = 1
-                    break
-            features["HasSocialNetworking"] = has_social
-
-        if "HasPasswordField" in self.required_html_features:
-            password_fields = soup.find_all("input", {"type": "password"})
-            features["HasPasswordField"] = 1 if password_fields else 0
-
-        if "HasSubmitButton" in self.required_html_features:
-            submit_buttons = soup.find_all("input", {"type": "submit"})
-            submit_buttons.extend(soup.find_all("button", {"type": "submit"}))
-            features["HasSubmitButton"] = 1 if submit_buttons else 0
-
-        if "HasKeywordCrypto" in self.required_html_features:
-            has_crypto_keyword = 0
-            for keyword in self.crypto_keywords:
-                if keyword in html_content.lower():
-                    has_crypto_keyword = 1
-                    break
-            features["HasKeywordCrypto"] = has_crypto_keyword
-
-        if "NoOfPopup" in self.required_html_features:
-            popups = 0
-            popups += len(
-                soup.find_all("script", string=re.compile("window.open|popup|alert"))
-            )
-            features["NoOfPopup"] = popups
-
-        if "NoOfiFrame" in self.required_html_features:
-            iframes = len(soup.find_all("iframe"))
-            features["NoOfiFrame"] = iframes
-
-        if "NoOfImage" in self.required_html_features:
-            images = len(soup.find_all("img"))
-            features["NoOfImage"] = images
-
-        if "NoOfJS" in self.required_html_features:
-            scripts = len(soup.find_all("script"))
-            features["NoOfJS"] = scripts
-
-        if "NoOfCSS" in self.required_html_features:
-            css = len(soup.find_all("link", {"rel": "stylesheet"}))
-            css += len(soup.find_all("style"))
-            features["NoOfCSS"] = css
-
-        if "NoOfURLRedirect" in self.required_html_features:
-            redirects = 0
-            redirect_patterns = ["window.location", "document.location", ".href"]
-            scripts = soup.find_all("script")
-            for script in scripts:
-                if script.string:
-                    for pattern in redirect_patterns:
-                        if pattern in script.string:
-                            redirects += 1
-            features["NoOfURLRedirect"] = redirects
-
-        if "NoOfHyperlink" in self.required_html_features:
-            links = len(soup.find_all("a"))
-            features["NoOfHyperlink"] = links
-
-        return features
-
-    def _is_ip_address(self, domain):
-        """Checks if a domain is an IP address."""
-        pattern = re.compile(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$")
-        if not pattern.match(domain):
-            return False
-        return all(0 <= int(n) < 256 for n in pattern.match(domain).groups())
 
     def _generate_default_features(self):
         """
@@ -454,41 +497,8 @@ class WebFeatureExtractor:
         """
         features = {"url": "error"}
 
-        # Add default values for all required features from our defaults dictionary
-        for feature in self.required_features:
+        # Add default values for all expected features from our defaults dictionary
+        for feature in self.expected_features:
             features[feature] = self.default_values.get(feature, 0)
 
         return features
-
-    def _generate_default_html_features(self):
-        """
-        Generates default values for HTML features.
-        """
-        features = {}
-
-        for feature in self.required_html_features:
-            features[feature] = self.default_values.get(feature, 0)
-
-        return features
-
-    def ensure_all_features(self, features_dict: Dict) -> Dict:
-        """
-        Ensures that all features required by the model are present.
-
-        Args:
-            features_dict: Dictionary of extracted features
-
-        Returns:
-            Dict: Dictionary completed with all required features
-        """
-        # Check for missing features
-        missing_features = set(self.required_features) - set(features_dict.keys())
-
-        if missing_features:
-            logger.warning(f"Missing features in final result: {missing_features}")
-
-            # Add missing features with appropriate default values
-            for feature in missing_features:
-                features_dict[feature] = self.default_values.get(feature, 0)
-
-        return features_dict

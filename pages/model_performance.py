@@ -230,10 +230,14 @@ def show_model_performance():
                 )
             )
 
-    fig_cm = go.Figure(
-        data=go.Heatmap(z=z, x=x, y=y, colorscale="Blues", showscale=False)
-    )
+    custom_colorscale = [
+        [0, "rgba(0,255,255,0.8)"],  # Valeur minimale = cyan semi-transparent
+        [1, "rgb(0,0,128)"],  # Valeur maximale = bleu foncé
+    ]
 
+    fig_cm = go.Figure(
+        data=go.Heatmap(z=z, x=x, y=y, colorscale=custom_colorscale, showscale=False)
+    )
     fig_cm.update_layout(
         title="Confusion Matrix",
         annotations=annotations,
@@ -295,7 +299,7 @@ def show_model_performance():
             title="ROC Curve",
             xaxis=dict(title="False Positive Rate"),
             yaxis=dict(title="True Positive Rate"),
-            legend=dict(x=0.01, y=0.99, bgcolor="rgba(255,255,255,0.8)"),
+            legend=dict(x=0.01, y=0.99, bgcolor="rgba(0,255,255,0.8)"),
             margin=dict(l=20, r=20, t=40, b=20),
         )
 
