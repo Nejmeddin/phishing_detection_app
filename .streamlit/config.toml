@@ -1,5 +1,13 @@
-#[ui]
-#hideSidebarNav = true
-
 [client]
-showSidebarNavigation = false  # ✅ Optional, for some versions
+# Hide the "Deploy" button and dev menu on the public demo.
+toolbarMode = "minimal"
+# The app renders its own sidebar navigation from `views/`, so Streamlit's
+# automatic multipage navigation is disabled.
+showSidebarNavigation = false
+
+[theme]
+primaryColor = "#1E90FF"
+base = "dark"
+
+[server]
+headless = true

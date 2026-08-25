@@ -1,4 +1,34 @@
+# Byte-compiled / optimized files
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
 evenv/
+
+# Secrets — never commit real API keys
+.env
+.env.local
+*.pem
+
+# Logs and derived artefacts
+*.log
+data/processed/model_metrics.json
+
+# Test and coverage output
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

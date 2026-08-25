@@ -4,65 +4,19 @@ This page describes the different preprocessing steps applied to the dataset
 before model training.
 """
 
-import os
-import streamlit as st
-import pandas as pd
+import pickle
+
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from pathlib import Path
+import streamlit as st
+
+from src.config import FEATURE_DISPLAY_NAMES, MODEL_PATH
 
 
 def show_preprocessing():
     """Displays the preprocessing explanation page."""
-
-    st.markdown(
-        """
-        <style>
-        .info-box {
-            background-color: #1e293b; /* Slate-800 from Tailwind, good with dark backgrounds */
-            color: #f8fafc; /* Text: light slate/white */
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            font-family: 'Segoe UI', sans-serif;
-        }
-    
-        .info-box h2 {
-            color: #38bdf8; /* Light blue */
-            margin-bottom: 10px;
-        }
-    
-        .info-box p {
-            color: #e2e8f0; /* Light grey-blue for readability */
-            font-size: 16px;
-            line-height: 1.6;
-        }
-    
-        .main-title {
-            color: #0ea5e9; /* Strong title */
-            text-align: center;
-            margin-bottom: 30px;
-        }
-    
-        .section-title {
-            color: #38bdf8;
-            margin-top: 30px;
-        }
-    
-        .warning-box {
-            background-color: #facc15; /* Yellow */
-            color: #1e293b;
-            padding: 15px;
-            border-left: 5px solid #f59e0b;
-            border-radius: 8px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
 
     # Main title
     st.markdown(
@@ -105,7 +59,7 @@ def show_preprocessing():
                 x=list(range(len(pipeline_steps))),
                 y=[0] * len(pipeline_steps),
                 mode="markers+text",
-                marker=dict(size=30, color="#6495ED"),
+                marker={"size": 30, "color": "#6495ED"},
                 text=pipeline_steps,
                 textposition="bottom center",
             )
@@ -133,12 +87,12 @@ def show_preprocessing():
     # Configure layout
     fig.update_layout(
         title="Data Preprocessing Pipeline",
-        xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
-        yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+        xaxis={"showticklabels": False, "showgrid": False, "zeroline": False},
+        yaxis={"showticklabels": False, "showgrid": False, "zeroline": False},
         plot_bgcolor="white",
         height=250,
         width=800,
-        margin=dict(l=20, r=20, t=50, b=150),
+        margin={"l": 20, "r": 20, "t": 50, "b": 150},
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -386,85 +340,80 @@ def show_preprocessing():
     """
     )
 
-    # Illustration of feature selection
-    feature_names = [
-        "url_length",
-        "domain_length",
-        "path_length",
-        "query_length",
-        "dots_count",
-        "is_https",
-        "has_ip_address",
-        "has_suspicious_tld",
-        "subdomain_count",
-        "domain_contains_number",
-        "has_suspicious_keywords",
+    # The RFECV search history is not persisted in the model bundle, so the
+    # curve below is a schematic of how the method behaves — it is labelled as
+    # such rather than passed off as this project's measurements.
+    st.markdown("### How RFECV converges (illustrative)")
+
+    illustrative_scores = [
+        0.75,
+        0.82,
+        0.86,
+        0.88,
+        0.91,
+        0.93,
+        0.94,
+        0.935,
+        0.933,
+        0.932,
+        0.931,
     ]
+    optimal = int(np.argmax(illustrative_scores)) + 1
 
-    # Simulate performance scores for different numbers of features
-    np.random.seed(42)
-    base_scores = np.array(
-        [0.75, 0.82, 0.86, 0.88, 0.91, 0.93, 0.94, 0.935, 0.933, 0.932, 0.931]
-    )
-    scores = base_scores + np.random.normal(0, 0.01, size=len(base_scores))
-
-    # Create the chart
     fig = go.Figure()
-
     fig.add_trace(
         go.Scatter(
-            x=list(range(1, len(feature_names) + 1)),
-            y=scores,
+            x=list(range(1, len(illustrative_scores) + 1)),
+            y=illustrative_scores,
             mode="lines+markers",
             name="Cross-validation score",
-            marker=dict(size=8, color="#6495ED"),
-            line=dict(width=2, color="#6495ED"),
+            marker={"size": 8, "color": "#6495ED"},
+            line={"width": 2, "color": "#6495ED"},
         )
     )
-
-    # Add a vertical line for the optimal number of features
-    optimal = np.argmax(scores) + 1
     fig.add_vline(
         x=optimal,
         line_dash="dash",
         line_color="#FF7F50",
-        annotation_text=f"Optimal: {optimal} features",
+        annotation_text=f"Score plateaus at {optimal} features",
         annotation_position="top right",
     )
-
     fig.update_layout(
-        title="Feature Selection with RFECV",
-        xaxis_title="Number of features",
-        yaxis_title="F1 Score (cross-validation)",
-        yaxis=dict(range=[0.7, 0.96]),
+        title="Typical RFECV behaviour (illustrative, not measured)",
+        xaxis_title="Number of features retained",
+        yaxis_title="F1 score (cross-validation)",
+        yaxis={"range": [0.7, 0.96]},
     )
-
     st.plotly_chart(fig, use_container_width=True)
-
-    # Selected features
-    st.markdown("### Features Selected After RFECV")
-
-    # Simulate feature importance
-    selected_features = feature_names[:optimal]
-    importance = np.sort(np.random.uniform(0.1, 1.0, size=len(selected_features)))[::-1]
-
-    # Create a DataFrame for display
-    feature_importance_df = pd.DataFrame(
-        {"Feature": selected_features, "Relative Importance": importance}
+    st.caption(
+        "Illustrative curve showing the shape of an RFECV search. The features "
+        "actually selected for this model are shown below."
     )
 
-    # Display the importance chart
-    fig = px.bar(
-        feature_importance_df,
-        x="Relative Importance",
-        y="Feature",
-        orientation="h",
-        title="Importance of Selected Features",
-        color="Relative Importance",
-        color_continuous_scale="Blues",
-    )
+    # The selected features and their importances are real: they come straight
+    # from the trained bundle.
+    st.markdown("### Features actually selected for this model")
 
-    st.plotly_chart(fig, use_container_width=True)
+    importance_df = _load_selected_feature_importance()
+    if importance_df is None:
+        st.info(
+            "Load the trained model bundle to see the selected features and "
+            "their importances."
+        )
+    else:
+        st.plotly_chart(
+            px.bar(
+                importance_df,
+                x="Importance",
+                y="Feature",
+                orientation="h",
+                title=f"Importance of the {len(importance_df)} selected features",
+                color="Importance",
+                color_continuous_scale="Blues",
+                height=650,
+            ),
+            use_container_width=True,
+        )
 
     # Summary and conclusion
     st.markdown(
@@ -474,17 +423,19 @@ def show_preprocessing():
 
     st.markdown(
         """
-    All of these preprocessing steps have a significant impact on model performance:
-    
-    | Preprocessing Step | Impact on Performance |
-    |------------------------|------------------------------|
-    | Transformation (PowerTransformer) | +5% improvement |
-    | Standardization (StandardScaler) | +3% improvement |
-    | Anomaly Detection (IsolationForest) | +2% improvement |
-    | Class Balancing (SMOTE) | +8% improvement |
-    | Feature Selection (RFECV) | +4% improvement |
-    
-    These cumulative gains result in a much more performant and robust LightGBM model for phishing detection.
+    Each step in the pipeline addresses a specific obstacle in the raw data:
+
+    | Preprocessing step | Problem it solves |
+    |---|---|
+    | PowerTransformer | URL counts are heavily right-skewed; this makes them closer to normal |
+    | StandardScaler | Puts features measured on very different scales onto comparable footing |
+    | IsolationForest | Removes extreme outliers that would otherwise dominate the splits |
+    | SMOTE | Balances the two classes so the model does not simply favour the majority |
+    | RFECV | Drops redundant features, cutting inference cost and overfitting risk |
+
+    Applied together, they take the raw dataset to the 23-feature representation
+    the shipped model is trained on. The resulting scores are reported in the
+    **Model Performance** section, measured on a held-out test set.
     """
     )
 
@@ -498,3 +449,28 @@ def show_preprocessing():
     To see the final performance of the model after this preprocessing, see the "Model Performance" section.
     """
     )
+
+
+@st.cache_data
+def _load_selected_feature_importance():
+    """Return the trained model's feature importances, or ``None`` if absent.
+
+    Reads the bundle directly so the chart always reflects the shipped model.
+    """
+    if not MODEL_PATH.exists():
+        return None
+
+    try:
+        with open(MODEL_PATH, "rb") as file:
+            bundle = pickle.load(file)
+    except (OSError, pickle.UnpicklingError):
+        return None
+
+    names = list(bundle.get("selected_feature_names", []))
+    importance = bundle.get("metrics", {}).get("feature_importance", [])
+    if not names or len(importance) != len(names):
+        return None
+
+    display_names = [FEATURE_DISPLAY_NAMES.get(name, name) for name in names]
+    frame = pd.DataFrame({"Feature": display_names, "Importance": list(importance)})
+    return frame.sort_values("Importance", ascending=True).reset_index(drop=True)

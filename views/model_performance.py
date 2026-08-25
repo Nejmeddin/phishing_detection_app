@@ -4,66 +4,19 @@ This page displays various evaluation metrics and visualizations
 of the LightGBM model's performance.
 """
 
-import os
-import streamlit as st
-import pandas as pd
+import pickle
+
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from pathlib import Path
-import pickle
+import streamlit as st
+
+from src.config import MODEL_PATH
 
 
 def show_model_performance():
     """Displays the model performance evaluation page."""
-
-    st.markdown(
-        """
-        <style>
-        .info-box {
-            background-color: #1e293b; /* Slate-800 from Tailwind, good with dark backgrounds */
-            color: #f8fafc; /* Text: light slate/white */
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            font-family: 'Segoe UI', sans-serif;
-        }
-    
-        .info-box h2 {
-            color: #38bdf8; /* Light blue */
-            margin-bottom: 10px;
-        }
-    
-        .info-box p {
-            color: #e2e8f0; /* Light grey-blue for readability */
-            font-size: 16px;
-            line-height: 1.6;
-        }
-    
-        .main-title {
-            color: #0ea5e9; /* Strong title */
-            text-align: center;
-            margin-bottom: 30px;
-        }
-    
-        .section-title {
-            color: #38bdf8;
-            margin-top: 30px;
-        }
-    
-        .warning-box {
-            background-color: #facc15; /* Yellow */
-            color: #1e293b;
-            padding: 15px;
-            border-left: 5px solid #f59e0b;
-            border-radius: 8px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
 
     # Main title
     st.markdown(
@@ -83,87 +36,35 @@ def show_model_performance():
         unsafe_allow_html=True,
     )
 
-    # Loading model metrics
     @st.cache_data
     def load_model_metrics():
-        """Loads model metrics from the pickle file."""
-        try:
-            base_path = Path(__file__).parent.parent
-            model_path = os.path.join(
-                base_path, "data", "processed", "lightgbm_phishing_model.pkl"
+        """Load the evaluation metrics recorded at training time.
+
+        The metrics are read from the model bundle itself so that this page can
+        only ever display numbers the model actually produced. If the bundle is
+        unavailable the page stops rather than substituting placeholder values:
+        a performance report showing invented figures is worse than no report.
+        """
+        if not MODEL_PATH.exists():
+            st.error(
+                f"Model bundle not found at `{MODEL_PATH}`. "
+                "Restore it or re-run training to view performance metrics."
             )
+            st.stop()
 
-            if not os.path.exists(model_path):
-                # If file doesn't exist, use simulated metrics
-                return generate_sample_metrics()
-
-            with open(model_path, "rb") as file:
+        try:
+            with open(MODEL_PATH, "rb") as file:
                 model_data = pickle.load(file)
+        except (OSError, pickle.UnpicklingError) as exc:
+            st.error(f"Could not read the model bundle: {exc}")
+            st.stop()
 
-            return model_data.get("metrics", generate_sample_metrics())
+        metrics = model_data.get("metrics")
+        if not metrics:
+            st.error("The model bundle contains no evaluation metrics.")
+            st.stop()
 
-        except Exception as e:
-            st.error(f"Error loading model metrics: {str(e)}")
-            return generate_sample_metrics()
-
-    def generate_sample_metrics():
-        """Generates simulated model metrics for demonstration."""
-        np.random.seed(42)
-
-        # Create a dummy confusion matrix
-        cm = np.array([[850, 50], [30, 870]])
-
-        # Calculate basic metrics
-        accuracy = (cm[0, 0] + cm[1, 1]) / np.sum(cm)
-        precision = cm[1, 1] / (cm[0, 1] + cm[1, 1])
-        recall = cm[1, 1] / (cm[1, 0] + cm[1, 1])
-        f1 = 2 * (precision * recall) / (precision + recall)
-
-        # Generate points for ROC and PR curves
-        n_points = 100
-        fpr = np.sort(np.random.uniform(0, 1, n_points))
-        tpr = np.clip(fpr + np.random.beta(8, 2, n_points) * (1 - fpr), 0, 1)
-        roc_auc = np.trapz(tpr, fpr)
-
-        precision_curve = np.clip(np.sort(np.random.beta(8, 2, n_points))[::-1], 0, 1)
-        recall_curve = np.sort(np.random.uniform(0, 1, n_points))
-        pr_auc = np.trapz(precision_curve, recall_curve)
-
-        # Generate feature importances
-        feature_names = [
-            "url_length",
-            "domain_length",
-            "path_length",
-            "dots_count",
-            "is_https",
-            "has_ip_address",
-            "subdomain_count",
-            "domain_contains_number",
-            "has_suspicious_keywords",
-            "domain_age",
-            "ssl_valid",
-            "is_blacklisted",
-        ]
-        feature_importance = np.sort(np.random.exponential(2, size=len(feature_names)))[
-            ::-1
-        ]
-        feature_importance = feature_importance / np.sum(feature_importance) * 100
-
-        return {
-            "confusion_matrix": cm,
-            "accuracy": accuracy,
-            "precision": precision,
-            "recall": recall,
-            "f1": f1,
-            "fpr": fpr,
-            "tpr": tpr,
-            "roc_auc": roc_auc,
-            "precision_curve": precision_curve,
-            "recall_curve": recall_curve,
-            "pr_auc": pr_auc,
-            "feature_importance": feature_importance,
-            "feature_names": feature_names,
-        }
+        return metrics
 
     # Load metrics
     metrics = load_model_metrics()
@@ -221,18 +122,18 @@ def show_model_performance():
     for i, row in enumerate(z):
         for j, value in enumerate(row):
             annotations.append(
-                dict(
-                    x=x[j],
-                    y=y[i],
-                    text=f"{value}<br>({value/np.sum(z):.1%})",
-                    showarrow=False,
-                    font=dict(size=14),
-                )
+                {
+                    "x": x[j],
+                    "y": y[i],
+                    "text": f"{value}<br>({value/np.sum(z):.1%})",
+                    "showarrow": False,
+                    "font": {"size": 14},
+                }
             )
 
     custom_colorscale = [
         [0, "rgba(0,255,255,0.8)"],  # Valeur minimale = cyan semi-transparent
-        [1, "rgb(0,0,128)"],  # Valeur maximale = bleu foncé
+        [1, "rgb(0,0,128)"],  # Maximum value = dark blue
     ]
 
     fig_cm = go.Figure(
@@ -241,8 +142,8 @@ def show_model_performance():
     fig_cm.update_layout(
         title="Confusion Matrix",
         annotations=annotations,
-        xaxis=dict(title="Prediction"),
-        yaxis=dict(title="Actual Value"),
+        xaxis={"title": "Prediction"},
+        yaxis={"title": "Actual Value"},
     )
 
     st.plotly_chart(fig_cm, use_container_width=True)
@@ -280,7 +181,7 @@ def show_model_performance():
                 y=metrics["tpr"],
                 mode="lines",
                 name=f"AUC = {metrics['roc_auc']:.3f}",
-                line=dict(color="#6495ED", width=2),
+                line={"color": "#6495ED", "width": 2},
             )
         )
 
@@ -291,16 +192,16 @@ def show_model_performance():
                 y=[0, 1],
                 mode="lines",
                 name="Random",
-                line=dict(color="gray", width=2, dash="dash"),
+                line={"color": "gray", "width": 2, "dash": "dash"},
             )
         )
 
         fig_roc.update_layout(
             title="ROC Curve",
-            xaxis=dict(title="False Positive Rate"),
-            yaxis=dict(title="True Positive Rate"),
-            legend=dict(x=0.01, y=0.99, bgcolor="rgba(0,255,255,0.8)"),
-            margin=dict(l=20, r=20, t=40, b=20),
+            xaxis={"title": "False Positive Rate"},
+            yaxis={"title": "True Positive Rate"},
+            legend={"x": 0.01, "y": 0.99, "bgcolor": "rgba(0,255,255,0.8)"},
+            margin={"l": 20, "r": 20, "t": 40, "b": 20},
         )
 
         st.plotly_chart(fig_roc, use_container_width=True)
@@ -316,7 +217,7 @@ def show_model_performance():
                 y=metrics["precision_curve"],
                 mode="lines",
                 name=f"AP = {metrics['pr_auc']:.3f}",
-                line=dict(color="#FF7F50", width=2),
+                line={"color": "#FF7F50", "width": 2},
             )
         )
 
@@ -328,16 +229,16 @@ def show_model_performance():
                 y=[baseline, baseline],
                 mode="lines",
                 name="Baseline",
-                line=dict(color="gray", width=2, dash="dash"),
+                line={"color": "gray", "width": 2, "dash": "dash"},
             )
         )
 
         fig_pr.update_layout(
             title="Precision-Recall Curve",
-            xaxis=dict(title="Recall"),
-            yaxis=dict(title="Precision"),
-            legend=dict(x=0.01, y=0.01, bgcolor="rgba(255,255,255,0.8)"),
-            margin=dict(l=20, r=20, t=40, b=20),
+            xaxis={"title": "Recall"},
+            yaxis={"title": "Precision"},
+            legend={"x": 0.01, "y": 0.01, "bgcolor": "rgba(255,255,255,0.8)"},
+            margin={"l": 20, "r": 20, "t": 40, "b": 20},
         )
 
         st.plotly_chart(fig_pr, use_container_width=True)
@@ -388,7 +289,7 @@ def show_model_performance():
     fig_importance.update_layout(
         xaxis_title="Relative Importance (%)",
         yaxis_title="",
-        yaxis=dict(autorange="reversed"),
+        yaxis={"autorange": "reversed"},
     )
 
     st.plotly_chart(fig_importance, use_container_width=True)
@@ -426,8 +327,8 @@ def show_model_performance():
             y=train_scores,
             mode="lines+markers",
             name="Training Score",
-            line=dict(color="#6495ED", width=2),
-            marker=dict(size=8),
+            line={"color": "#6495ED", "width": 2},
+            marker={"size": 8},
         )
     )
 
@@ -443,7 +344,7 @@ def show_model_performance():
             ),
             fill="toself",
             fillcolor="rgba(100, 149, 237, 0.2)",
-            line=dict(color="rgba(255,255,255,0)"),
+            line={"color": "rgba(255,255,255,0)"},
             hoverinfo="skip",
             showlegend=False,
         )
@@ -455,8 +356,8 @@ def show_model_performance():
             y=test_scores,
             mode="lines+markers",
             name="Validation Score",
-            line=dict(color="#FF7F50", width=2),
-            marker=dict(size=8),
+            line={"color": "#FF7F50", "width": 2},
+            marker={"size": 8},
         )
     )
 
@@ -469,7 +370,7 @@ def show_model_performance():
             ),
             fill="toself",
             fillcolor="rgba(255, 127, 80, 0.2)",
-            line=dict(color="rgba(255,255,255,0)"),
+            line={"color": "rgba(255,255,255,0)"},
             hoverinfo="skip",
             showlegend=False,
         )
@@ -477,9 +378,9 @@ def show_model_performance():
 
     fig_learning.update_layout(
         title="LightGBM Model Learning Curve",
-        xaxis=dict(title="Training Set Size (%)"),
-        yaxis=dict(title="Score (Accuracy)"),
-        legend=dict(x=0.01, y=0.01, bgcolor="rgba(255,255,255,0.8)"),
+        xaxis={"title": "Training Set Size (%)"},
+        yaxis={"title": "Score (Accuracy)"},
+        legend={"x": 0.01, "y": 0.01, "bgcolor": "rgba(255,255,255,0.8)"},
     )
 
     st.plotly_chart(fig_learning, use_container_width=True)
@@ -544,7 +445,7 @@ def show_model_performance():
         )
 
     fig_radar.update_layout(
-        polar=dict(radialaxis=dict(visible=True, range=[0.85, 0.96])),
+        polar={"radialaxis": {"visible": True, "range": [0.85, 0.96]}},
         title="Performance Comparison of Different Models",
         showlegend=True,
     )

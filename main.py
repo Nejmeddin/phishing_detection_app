@@ -1,98 +1,61 @@
+"""Entry point for the phishing detection application.
+
+Run it with::
+
+    streamlit run main.py
+
+The module wires together the navigation sidebar and the individual views; all
+domain logic lives under ``src/``.
 """
-Main phishing detection application.
-This application allows analyzing URLs to detect if they are legitimate or malicious.
-"""
+
+import logging
 
 import streamlit as st
-import os
-import sys
 
-# Page configuration - DOIT ÊTRE LE PREMIER APPEL À STREAMLIT
+from src.config import STREAMLIT_CONFIG
+
+# Must be the first Streamlit call in the process.
 st.set_page_config(
-    page_title="Phishing Detection",
-    page_icon="🔒",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    page_title=STREAMLIT_CONFIG["page_title"],
+    page_icon=STREAMLIT_CONFIG["page_icon"],
+    layout=STREAMLIT_CONFIG["layout"],
+    initial_sidebar_state=STREAMLIT_CONFIG["initial_sidebar_state"],
 )
 
-# Import des modules après st.set_page_config
-from PIL import Image
+from views.data_exploration import show_data_exploration  # noqa: E402
+from views.home import show_home  # noqa: E402
+from views.model_performance import show_model_performance  # noqa: E402
+from views.prediction import show_prediction  # noqa: E402
+from views.preprocessing import show_preprocessing  # noqa: E402
+from views.styles import inject_custom_css  # noqa: E402
 
-# Add parent directory to Python path to be able to import project modules
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Import application pages
-from pages.home import show_home
-from pages.data_exploration import show_data_exploration
-from pages.preprocessing import show_preprocessing
-from pages.model_performance import show_model_performance
-from pages.prediction import show_prediction
-
-# Custom CSS
-st.markdown(
-    """
-<style>
-    .main-title {
-        font-size: 2.5rem;
-        color: #1E90FF;
-        text-align: center;
-        margin-bottom: 1.5rem;
-    }
-    .section-title {
-        font-size: 1.8rem;
-        color: #3D85C6;
-        margin-top: 1.2rem;
-        margin-bottom: 0.8rem;
-    }
-    .info-box {
-        background-color: #3D85C6;
-        padding: 1rem;
-        border-radius: 5px;
-        margin-bottom: 1rem;
-    }
-    .warning-box {
-        background-color: #38bdf8;
-        padding: 1rem;
-        border-radius: 5px;
-        margin-bottom: 1rem;
-    }
-    .success-box {
-        background-color: #3D85C6;
-        padding: 1rem;
-        border-radius: 5px;
-        margin-bottom: 1rem;
-    }
-</style>
-""",
-    unsafe_allow_html=True,
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
-# Sidebar for navigation
-st.sidebar.title("Navigation")
-page = st.sidebar.radio(
-    "Choose a section:",
-    [
-        "Home",
-        "Data Exploration",
-        "Preprocessing",
-        "Model Performance",
-        "Prediction",
-    ],
-)
+PAGES = {
+    "Home": show_home,
+    "Data Exploration": show_data_exploration,
+    "Preprocessing": show_preprocessing,
+    "Model Performance": show_model_performance,
+    "Prediction": show_prediction,
+}
 
-# Display selected page
-if page == "Home":
-    show_home()
-elif page == "Data Exploration":
-    show_data_exploration()
-elif page == "Preprocessing":
-    show_preprocessing()
-elif page == "Model Performance":
-    show_model_performance()
-elif page == "Prediction":
-    show_prediction()
 
-# Footer
-st.sidebar.markdown("---")
-st.sidebar.info("Developed with B-H-N")
-st.sidebar.text("Version 1.0.0")
+def main() -> None:
+    """Render the sidebar and dispatch to the selected view."""
+    inject_custom_css()
+
+    st.sidebar.title("Navigation")
+    selection = st.sidebar.radio("Choose a section:", list(PAGES))
+
+    PAGES[selection]()
+
+    st.sidebar.markdown("---")
+    st.sidebar.caption("Phishing Detection · LightGBM")
+    st.sidebar.caption("Version 1.0.0")
+
+
+if __name__ == "__main__":
+    main()

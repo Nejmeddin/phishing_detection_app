@@ -5,55 +5,33 @@ Provides an overview of the app and its features.
 
 import streamlit as st
 
+# A shield with a fish hook through it: protection against phishing. Inlined as
+# SVG so it scales cleanly and needs no asset pipeline or network access.
+LOGO_SVG = """
+<div style="display:flex;justify-content:center;margin:0.5rem 0 2rem;">
+<svg width="120" height="120" viewBox="0 0 120 120" role="img"
+     aria-label="Phishing detection shield logo">
+  <defs>
+    <linearGradient id="shieldFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+  <path d="M60 10 L102 26 V60 C102 84 84 102 60 110 C36 102 18 84 18 60 V26 Z"
+        fill="url(#shieldFill)" stroke="#7dd3fc" stroke-width="2.5"/>
+  <path d="M74 34 V62 A16 16 0 0 1 42 62 A16 16 0 0 1 52 47"
+        fill="none" stroke="#0f172a" stroke-width="7"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M74 34 L66 42" stroke="#0f172a" stroke-width="7"
+        stroke-linecap="round"/>
+  <circle cx="74" cy="32" r="4.5" fill="#0f172a"/>
+</svg>
+</div>
+"""
+
 
 def show_home():
     """Displays the home page of the application."""
-
-    # st.markdown(
-    #     """
-    #     <style>
-    #     .info-box {
-    #         background-color: #1e293b;
-    #         color: #f8fafc;
-    #         padding: 20px;
-    #         border-radius: 12px;
-    #         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    #         font-family: 'Segoe UI', sans-serif;
-    #     }
-
-    #     .info-box h2 {
-    #         color: #38bdf8;
-    #         margin-bottom: 10px;
-    #     }
-
-    #     .info-box p {
-    #         color: #e2e8f0;
-    #         font-size: 16px;
-    #         line-height: 1.6;
-    #     }
-
-    #     .main-title {
-    #         color: #0ea5e9;
-    #         text-align: center;
-    #         margin-bottom: 30px;
-    #     }
-
-    #     .section-title {
-    #         color: #38bdf8;
-    #         margin-top: 30px;
-    #     }
-
-    #     .warning-box {
-    #         background-color: #facc15;
-    #         color: #1e293b;
-    #         padding: 15px;
-    #         border-left: 5px solid #f59e0b;
-    #         border-radius: 8px;
-    #     }
-    #     </style>
-    #     """,
-    #     unsafe_allow_html=True,
-    # )
 
     # Main title
     st.markdown(
@@ -61,10 +39,9 @@ def show_home():
         unsafe_allow_html=True,
     )
 
-    # Image or logo
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.image("https://cdn-icons-png.flaticon.com/512/1547/1547537.png", width=200)
+    # Logo, inlined rather than fetched from a CDN so the page renders
+    # identically offline and carries no third-party dependency.
+    st.markdown(LOGO_SVG, unsafe_allow_html=True)
 
     # Introduction
     st.markdown(

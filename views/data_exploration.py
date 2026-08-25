@@ -4,129 +4,11 @@ This page allows visualization and understanding of the dataset used for
 model training.
 """
 
-import os
-import streamlit as st
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly.express as px
-import plotly.graph_objects as go
-from pathlib import Path
+import streamlit as st
 
-
-def generate_sample_data():
-    """
-    Generates synthetic data for demonstration.
-
-    Returns:
-        pd.DataFrame: DataFrame containing synthetic data
-    """
-    st.markdown(
-        """
-        <style>
-        .info-box {
-            background-color: #1e293b; /* Slate-800 from Tailwind, good with dark backgrounds */
-            color: #f8fafc; /* Text: light slate/white */
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            font-family: 'Segoe UI', sans-serif;
-        }
-    
-        .info-box h2 {
-            color: #38bdf8; /* Light blue */
-            margin-bottom: 10px;
-        }
-    
-        .info-box p {
-            color: #e2e8f0; /* Light grey-blue for readability */
-            font-size: 16px;
-            line-height: 1.6;
-        }
-    
-        .main-title {
-            color: #0ea5e9; /* Strong title */
-            text-align: center;
-            margin-bottom: 30px;
-        }
-    
-        .section-title {
-            color: #38bdf8;
-            margin-top: 30px;
-        }
-    
-        .warning-box {
-            background-color: #facc15; /* Yellow */
-            color: #1e293b;
-            padding: 15px;
-            border-left: 5px solid #f59e0b;
-            border-radius: 8px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # Number of samples
-    n_legitimate = 1000
-    n_phishing = 800
-
-    # Features for legitimate URLs
-    legitimate_data = {
-        "url_length": np.random.normal(50, 15, n_legitimate),
-        "domain_length": np.random.normal(12, 4, n_legitimate),
-        "path_length": np.random.normal(20, 10, n_legitimate),
-        "query_length": np.random.normal(15, 8, n_legitimate),
-        "dots_count": np.random.normal(2, 1, n_legitimate).astype(int),
-        "hyphens_count": np.random.normal(0.5, 0.7, n_legitimate).astype(int),
-        "underscores_count": np.random.normal(0.3, 0.6, n_legitimate).astype(int),
-        "slashes_count": np.random.normal(4, 1.5, n_legitimate).astype(int),
-        "is_https": np.random.binomial(1, 0.8, n_legitimate),
-        "has_ip_address": np.random.binomial(1, 0.02, n_legitimate),
-        "has_suspicious_tld": np.random.binomial(1, 0.05, n_legitimate),
-        "subdomain_count": np.random.poisson(1, n_legitimate),
-        "domain_contains_number": np.random.binomial(1, 0.15, n_legitimate),
-        "has_suspicious_keywords": np.random.binomial(1, 0.1, n_legitimate),
-        "domain_age": np.random.gamma(5, 1, n_legitimate),
-        "CLASS_LABEL": np.zeros(n_legitimate, dtype=int),
-    }
-
-    # Features for phishing URLs
-    phishing_data = {
-        "url_length": np.random.normal(80, 25, n_phishing),
-        "domain_length": np.random.normal(20, 7, n_phishing),
-        "path_length": np.random.normal(35, 15, n_phishing),
-        "query_length": np.random.normal(25, 12, n_phishing),
-        "dots_count": np.random.normal(3, 1.5, n_phishing).astype(int),
-        "hyphens_count": np.random.normal(1.5, 1.2, n_phishing).astype(int),
-        "underscores_count": np.random.normal(1.2, 1.1, n_phishing).astype(int),
-        "slashes_count": np.random.normal(5, 2, n_phishing).astype(int),
-        "is_https": np.random.binomial(1, 0.4, n_phishing),
-        "has_ip_address": np.random.binomial(1, 0.3, n_phishing),
-        "has_suspicious_tld": np.random.binomial(1, 0.4, n_phishing),
-        "subdomain_count": np.random.poisson(2, n_phishing),
-        "domain_contains_number": np.random.binomial(1, 0.6, n_phishing),
-        "has_suspicious_keywords": np.random.binomial(1, 0.7, n_phishing),
-        "domain_age": np.random.gamma(1, 0.5, n_phishing),
-        "CLASS_LABEL": np.ones(n_phishing, dtype=int),
-    }
-
-    # Creating DataFrames and merging
-    df_legitimate = pd.DataFrame(legitimate_data)
-    df_phishing = pd.DataFrame(phishing_data)
-    df = pd.concat([df_legitimate, df_phishing], ignore_index=True)
-
-    # Adding some derived features
-    df["is_tiny_url"] = np.random.binomial(1, 0.1, len(df))
-    df["ssl_valid"] = np.where(
-        df["is_https"] == 1, np.random.binomial(1, 0.9, len(df)), 0
-    )
-    df["is_blacklisted"] = np.where(
-        df["CLASS_LABEL"] == 1, np.random.binomial(1, 0.7, len(df)), 0
-    )
-
-    return df
+from src.config import PHISHING_DATASET_PATH
 
 
 def show_data_exploration():
@@ -146,25 +28,25 @@ def show_data_exploration():
         unsafe_allow_html=True,
     )
 
-    # Loading data
     @st.cache_data
     def load_data():
-        """Loads the dataset and caches it."""
-        try:
-            base_path = Path(__file__).parent.parent
-            data_path = os.path.join(
-                base_path, "data", "raw", "Phishing_Legitimate_full.csv"
+        """Load the training dataset.
+
+        The page reports on the real dataset or not at all: silently swapping in
+        generated data would make every statistic below a fabrication.
+        """
+        if not PHISHING_DATASET_PATH.exists():
+            st.error(
+                f"Dataset not found at `{PHISHING_DATASET_PATH}`. "
+                "Restore it to explore the data."
             )
+            st.stop()
 
-            if not os.path.exists(data_path):
-                # If the file doesn't exist, use simulated data
-                return generate_sample_data()
-
-            df = pd.read_csv(data_path)
-            return df
-        except Exception as e:
-            st.error(f"Error loading data: {str(e)}")
-            return generate_sample_data()
+        try:
+            return pd.read_csv(PHISHING_DATASET_PATH)
+        except (OSError, pd.errors.ParserError) as exc:
+            st.error(f"Could not read the dataset: {exc}")
+            st.stop()
 
     # Load the data
     df = load_data()
@@ -361,7 +243,7 @@ def show_data_exploration():
         corr_matrix,
         color_continuous_scale="RdBu_r",
         title="Correlations between features and target class",
-        labels=dict(color="Correlation"),
+        labels={"color": "Correlation"},
     )
 
     st.plotly_chart(fig, use_container_width=True)

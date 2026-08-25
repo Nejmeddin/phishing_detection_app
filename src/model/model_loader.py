@@ -1,487 +1,368 @@
-"""
-Module pour charger et utiliser le modèle de détection de phishing
+"""Load the trained LightGBM booster and run predictions with it.
+
+The pickle produced by the training pipeline bundles more than the booster: it
+also carries the fitted ``PowerTransformer`` and ``StandardScaler``, the feature
+selection mask, and the evaluation metrics. :class:`ModelLoader` restores all of
+them and reproduces the exact transformation order used at training time.
 """
 
-import os
-import pickle
-import logging
-import pandas as pd
-import numpy as np
+from __future__ import annotations
+
 import json
-from typing import Dict, List, Tuple, Any, Optional, Union
+import logging
+import pickle
 from pathlib import Path
+from typing import Any
 
-# Configuration du logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+import numpy as np
+import pandas as pd
+
+from src.config import (
+    DEFAULT_FEATURE_VALUES,
+    EXPECTED_FEATURES,
+    PREDICTION_THRESHOLD,
 )
+from src.utils.feature_enrichment import FeatureEnrichment
+
 logger = logging.getLogger(__name__)
 
 
 class ModelLoader:
-    """
-    Classe pour charger et utiliser le modèle LightGBM pour la détection de phishing
-    """
+    """Restore the trained model bundle and expose a prediction interface."""
 
-    def __init__(self, model_path: str):
+    def __init__(self, model_path: str | Path):
         """
-        Initialise le chargeur de modèle.
-
         Args:
-            model_path: Chemin vers le fichier pickle du modèle
+            model_path: Path to the pickled model bundle.
         """
-        self.model_path = model_path
+        self.model_path = Path(model_path)
         self.model = None
         self.power_transformer = None
         self.scaler = None
-        self.feature_names = []
-        self.selected_feature_names = []
+        self.feature_names: list[str] = []
+        self.selected_feature_names: list[str] = []
         self.selected_features_mask = None
-        self.metrics = {}
-        self.expected_features = [
-            "IsHTTPS",
-            "URLLength",
-            "NoOfSubDomain",
-            "NoOfDots",
-            "NoOfObfuscatedChar",
-            "NoOfQmark",
-            "NoOfDigits",
-            "LineLength",
-            "HasTitle",
-            "HasMeta",
-            "HasFavicon",
-            "HasCopyright",
-            "HasSocialNetworking",
-            "HasPasswordField",
-            "HasSubmitButton",
-            "HasKeywordCrypto",
-            "NoOfPopup",
-            "NoOfiFrame",
-            "NoOfImage",
-            "NoOfJS",
-            "NoOfCSS",
-            "NoOfURLRedirect",
-            "NoOfHyperlink",
-        ]
+        self.metrics: dict[str, Any] = {}
 
-        # Dictionnaire des valeurs par défaut spécifiques à chaque feature
-        self.default_values = {
-            "IsHTTPS": 0,  # Default: not HTTPS
-            "URLLength": 0,  # Default: zero length
-            "NoOfSubDomain": 0,  # Default: no subdomains
-            "NoOfDots": 0,  # Default: no dots
-            "NoOfObfuscatedChar": 0,  # Default: no obfuscated chars
-            "NoOfQmark": 0,  # Default: no question marks
-            "NoOfDigits": 0,  # Default: no digits
-            "LineLength": 0,  # Default: no lines
-            "HasTitle": 0,  # Default: no title
-            "HasMeta": 0,  # Default: no meta
-            "HasFavicon": 0,  # Default: no favicon
-            "HasCopyright": 0,  # Default: no copyright
-            "HasSocialNetworking": 0,  # Default: no social networking
-            "HasPasswordField": 0,  # Default: no password field
-            "HasSubmitButton": 0,  # Default: no submit button
-            "HasKeywordCrypto": 0,  # Default: no crypto keywords
-            "NoOfPopup": 0,  # Default: no popups
-            "NoOfiFrame": 0,  # Default: no iframes
-            "NoOfImage": 0,  # Default: no images
-            "NoOfJS": 0,  # Default: no JS
-            "NoOfCSS": 0,  # Default: no CSS
-            "NoOfURLRedirect": 0,  # Default: no redirects
-            "NoOfHyperlink": 0,  # Default: no hyperlinks
-        }
-
-        # Importer l'enrichisseur de caractéristiques
-        from src.utils.feature_enrichment import FeatureEnrichment
-
+        self.expected_features = list(EXPECTED_FEATURES)
+        self.default_values = dict(DEFAULT_FEATURE_VALUES)
         self.feature_enricher = FeatureEnrichment()
 
+    # ------------------------------------------------------------------ #
+    # Loading
+    # ------------------------------------------------------------------ #
     def load(self) -> bool:
-        """
-        Charge le modèle et ses composants à partir du fichier pickle.
+        """Restore the model bundle from disk.
 
         Returns:
-            bool: True si le chargement a réussi, False sinon
+            ``True`` when every essential component was recovered.
         """
         try:
-            logger.info(f"Chargement du modèle depuis: {self.model_path}")
+            logger.info("Loading model from: %s", self.model_path)
 
-            with open(self.model_path, "rb") as file:
-                model_data = pickle.load(file)
+            with open(self.model_path, "rb") as handle:
+                bundle = pickle.load(handle)
 
-            # Extraire les composants du modèle
-            self.model = model_data.get("model")
-            self.power_transformer = model_data.get("power_transformer")
-            self.scaler = model_data.get("scaler")
-            self.selected_features_mask = model_data.get("selected_features_mask")
-            self.selected_feature_names = model_data.get("selected_feature_names", [])
-            self.feature_names = model_data.get("feature_names", [])
-            self.metrics = model_data.get("metrics", {})
+            self.model = bundle.get("model")
+            self.power_transformer = bundle.get("power_transformer")
+            self.scaler = bundle.get("scaler")
+            self.selected_features_mask = bundle.get("selected_features_mask")
+            self.selected_feature_names = self._as_list(
+                bundle.get("selected_feature_names", [])
+            )
+            self.feature_names = self._as_list(bundle.get("feature_names", []))
+            self.metrics = bundle.get("metrics", {})
 
-            # Vérifier que les composants essentiels existent
-            if (
-                self.model is None
-                or self.selected_feature_names is None
-                or len(self.selected_feature_names) == 0
-            ):
-                logger.error("Composants essentiels du modèle manquants")
+            if self.model is None or not self.selected_feature_names:
+                logger.error("Model bundle is missing essential components")
                 return False
 
-            # Vérifier la cohérence avec nos attentes
-            missing_expected = set(self.selected_feature_names) - set(
-                self.expected_features
-            )
-            if missing_expected:
+            unexpected = set(self.selected_feature_names) - set(self.expected_features)
+            if unexpected:
                 logger.warning(
-                    f"Certaines caractéristiques du modèle ne sont pas dans notre liste attendue: {missing_expected}"
+                    "Model uses features absent from the expected list: %s", unexpected
                 )
 
-            # Sauvegarder les métriques du modèle dans un fichier JSON pour faciliter le débogage
-            metrics_file = os.path.join(
-                os.path.dirname(self.model_path), "model_metrics.json"
-            )
-            try:
-                with open(metrics_file, "w") as f:
-                    # Convertir les arrays numpy en listes pour JSON
-                    metrics_json = {}
-                    for key, value in self.metrics.items():
-                        if isinstance(value, np.ndarray):
-                            metrics_json[key] = value.tolist()
-                        else:
-                            metrics_json[key] = value
-
-                    # Ajouter les noms des caractéristiques
-                    metrics_json["selected_feature_names"] = self.selected_feature_names
-                    if isinstance(self.selected_feature_names, np.ndarray):
-                        metrics_json["selected_feature_names"] = (
-                            self.selected_feature_names.tolist()
-                        )
-
-                    json.dump(metrics_json, f, indent=2)
-                    logger.info(
-                        f"Métriques du modèle sauvegardées dans: {metrics_file}"
-                    )
-            except Exception as e:
-                logger.warning(f"Impossible de sauvegarder les métriques: {str(e)}")
-
             logger.info(
-                f"Modèle chargé avec succès. {len(self.selected_feature_names)} caractéristiques sélectionnées"
+                "Model loaded successfully with %d selected features",
+                len(self.selected_feature_names),
             )
             return True
 
-        except Exception as e:
-            logger.error(f"Erreur lors du chargement du modèle: {str(e)}")
-            import traceback
-
-            logger.error(traceback.format_exc())
+        except (OSError, pickle.UnpicklingError, AttributeError):
+            logger.exception("Failed to load the model from %s", self.model_path)
             return False
 
-    def get_required_features(self) -> List[str]:
-        """
-        Retourne la liste des caractéristiques requises par le modèle.
+    def export_metrics(self, destination: str | Path) -> bool:
+        """Write the bundled evaluation metrics to a JSON file.
 
-        Returns:
-            List[str]: Liste des noms de caractéristiques
-        """
-        # Convertir le pandas.Index en liste Python si nécessaire
-        if self.selected_feature_names is not None and hasattr(
-            self.selected_feature_names, "tolist"
-        ):
-            return self.selected_feature_names.tolist()
-        elif self.selected_feature_names is not None:
-            return list(self.selected_feature_names)
-        else:
-            return []
-
-    def ensure_feature_consistency(self, features_df: pd.DataFrame) -> pd.DataFrame:
-        """
-        S'assure que toutes les caractéristiques nécessaires sont présentes et dans le bon ordre.
-        Utilise l'enrichisseur de caractéristiques pour compléter les valeurs manquantes.
+        Kept separate from :meth:`load` so that reading the model never mutates
+        the filesystem. The file is written atomically: a partially serialised
+        payload can never replace a valid one.
 
         Args:
-            features_df: DataFrame contenant les caractéristiques extraites
+            destination: Path of the JSON file to write.
 
         Returns:
-            pd.DataFrame: DataFrame avec toutes les caractéristiques requises
+            ``True`` when the metrics were written successfully.
         """
-        required_features = self.get_required_features()
+        destination = Path(destination)
+        temporary = destination.with_suffix(".json.tmp")
 
-        # Log initial pour le débogage
-        logger.info(f"Features DataFrame initial: {features_df.columns.tolist()}")
-        logger.info(f"Features requises par le modèle: {required_features}")
+        try:
+            payload = {
+                key: self._jsonable(value) for key, value in self.metrics.items()
+            }
+            payload["selected_feature_names"] = self._as_list(
+                self.selected_feature_names
+            )
 
-        # Vérifier les caractéristiques manquantes
-        missing_features = [
-            f for f in required_features if f not in features_df.columns
-        ]
+            with open(temporary, "w", encoding="utf-8") as handle:
+                json.dump(payload, handle, indent=2)
+            temporary.replace(destination)
 
-        if missing_features:
-            logger.warning(f"Caractéristiques manquantes: {missing_features}")
+            logger.info("Model metrics written to: %s", destination)
+            return True
 
-            # Utiliser l'enrichisseur pour obtenir les caractéristiques manquantes
-            if "url" in features_df.columns:
+        except (OSError, TypeError, ValueError) as exc:
+            logger.warning("Could not export the model metrics: %s", exc)
+            temporary.unlink(missing_ok=True)
+            return False
+
+    # ------------------------------------------------------------------ #
+    # Feature preparation
+    # ------------------------------------------------------------------ #
+    def get_required_features(self) -> list[str]:
+        """Return the ordered list of features the booster expects."""
+        return self._as_list(self.selected_feature_names)
+
+    def ensure_feature_consistency(self, features_df: pd.DataFrame) -> pd.DataFrame:
+        """Guarantee the frame holds every required feature, in the right order.
+
+        Missing values are recovered through :class:`FeatureEnrichment` first and
+        replaced with neutral defaults only as a last resort.
+
+        Args:
+            features_df: Frame of locally extracted features.
+
+        Returns:
+            A frame containing exactly the required feature columns, in order,
+            plus the original ``url`` column when it was present.
+        """
+        required = self.get_required_features()
+        features_df = features_df.copy()
+
+        missing = [name for name in required if name not in features_df.columns]
+        if missing:
+            logger.warning("Missing features: %s", missing)
+
+            if "url" in features_df.columns and not features_df.empty:
                 url = features_df["url"].iloc[0]
-                features_dict = features_df.to_dict("records")[0]
-
-                # Tentative d'enrichissement
-                enriched_features = self.feature_enricher.enrich_features(
-                    url, features_dict, missing_features
-                )
-
-                # Ajouter les caractéristiques enrichies au DataFrame
-                for feature, value in enriched_features.items():
+                context = features_df.to_dict("records")[0]
+                enriched = self.feature_enricher.enrich_features(url, context, missing)
+                for feature, value in enriched.items():
                     features_df[feature] = value
 
-            # Vérifier s'il reste des caractéristiques manquantes après enrichissement
             still_missing = [
-                f for f in required_features if f not in features_df.columns
+                name for name in required if name not in features_df.columns
             ]
             if still_missing:
                 logger.warning(
-                    f"Caractéristiques toujours manquantes après enrichissement: {still_missing}"
+                    "Using default values after enrichment for: %s", still_missing
                 )
                 for feature in still_missing:
                     features_df[feature] = self.default_values.get(feature, 0)
 
-        # Validation de l'intégrité des données
-        for feature in required_features:
-            # Vérifier les valeurs manquantes ou NaN
-            if features_df[feature].isnull().any():
-                logger.warning(
-                    f"Valeurs NaN détectées pour {feature}, remplacement par valeur par défaut"
-                )
-                features_df[feature] = features_df[feature].fillna(
-                    self.default_values.get(feature, 0)
-                )
+        for feature in required:
+            column = features_df[feature]
 
-            # Vérifier les types de données et convertir si nécessaire
-            if features_df[feature].dtype == "object":
-                logger.warning(
-                    f"Type de données incorrect pour {feature}, conversion en numérique"
-                )
-                try:
-                    features_df[feature] = pd.to_numeric(
-                        features_df[feature], errors="coerce"
-                    )
-                    # Remplacer les NaN après conversion
-                    features_df[feature] = features_df[feature].fillna(
-                        self.default_values.get(feature, 0)
-                    )
-                except:
-                    features_df[feature] = self.default_values.get(feature, 0)
+            if column.dtype == "object":
+                logger.warning("Coercing non-numeric column %s", feature)
+                column = pd.to_numeric(column, errors="coerce")
 
-        # S'assurer que les colonnes sont dans le bon ordre
-        result_df = features_df[required_features].copy()
+            if column.isnull().any():
+                logger.warning("Filling missing values in %s", feature)
+                column = column.fillna(self.default_values.get(feature, 0))
 
-        # Conserver la colonne url si elle existe
+            features_df[feature] = column
+
+        result = features_df[required].copy()
         if "url" in features_df.columns:
-            result_df["url"] = features_df["url"]
+            result["url"] = features_df["url"]
 
-        # Log final pour le débogage
-        logger.info(f"Features DataFrame final: {result_df.columns.tolist()}")
+        return result
 
-        return result_df
+    def preprocess_features(self, features_df: pd.DataFrame) -> np.ndarray | None:
+        """Apply the training-time transformation chain to ``features_df``.
 
-    def preprocess_features(self, features_df: pd.DataFrame) -> np.ndarray:
-        """
-        Prétraite les caractéristiques avec le PowerTransformer et le StandardScaler.
+        The transformers were fitted on the full feature space, so the selected
+        columns are first widened back to that space, transformed, then narrowed
+        again through the selection mask.
 
         Args:
-            features_df: DataFrame contenant les caractéristiques
+            features_df: Frame holding at least every selected feature.
 
         Returns:
-            np.ndarray: Caractéristiques prétraitées
+            The transformed matrix, or ``None`` if a required column is absent.
         """
-        try:
-            # Vérifier que les caractéristiques requises sont présentes
-            if not all(f in features_df.columns for f in self.selected_feature_names):
-                missing = [
-                    f
-                    for f in self.selected_feature_names
-                    if f not in features_df.columns
-                ]
-                logger.error(
-                    f"Caractéristiques manquantes pour le prétraitement: {missing}"
-                )
-                return None
-
-            # Récupérer seulement les caractéristiques sélectionnées
-            X = features_df[self.selected_feature_names].values
-
-            # Log pour le débogage
-            logger.info(f"Forme des données avant prétraitement: {X.shape}")
-
-            # Créer un DataFrame avec toutes les caractéristiques originales attendues par le PowerTransformer
-            if self.feature_names is not None and len(self.feature_names) > 0:
-                logger.info(
-                    f"Adaptation des features pour correspondre au format attendu par le PowerTransformer"
-                )
-                # Initialiser un array de zéros avec les bonnes dimensions
-                full_X = np.zeros((X.shape[0], len(self.feature_names)))
-
-                # Remplir avec les valeurs disponibles
-                for i, feature in enumerate(self.feature_names):
-                    if feature in self.selected_feature_names:
-                        # Trouver l'index de cette caractéristique dans selected_feature_names
-                        idx = list(self.selected_feature_names).index(feature)
-                        # Copier la valeur
-                        full_X[:, i] = X[:, idx]
-
-                # Utiliser ce tableau complet pour le prétraitement
-                X = full_X
-                logger.info(f"Forme des données après adaptation: {X.shape}")
-
-            # Vérifier les valeurs invalides
-            if np.isnan(X).any() or np.isinf(X).any():
-                logger.warning(
-                    "Valeurs NaN ou Inf détectées dans les données. Remplacement par zéros."
-                )
-                X = np.nan_to_num(X, nan=0.0, posinf=0.0, neginf=0.0)
-
-            # Appliquer PowerTransformer si disponible
-            if self.power_transformer:
-                logger.info("Application du PowerTransformer")
-                try:
-                    X = self.power_transformer.transform(X)
-                except Exception as e:
-                    logger.error(f"Erreur avec PowerTransformer: {str(e)}")
-                    # Continuer sans cette transformation
-                    pass
-
-            # Appliquer StandardScaler si disponible
-            if self.scaler:
-                logger.info("Application du StandardScaler")
-                try:
-                    X = self.scaler.transform(X)
-                except Exception as e:
-                    logger.error(f"Erreur avec StandardScaler: {str(e)}")
-                    # Continuer sans cette transformation
-                    pass
-
-            # Si nous avions étendu X, récupérer seulement les colonnes sélectionnées
-            if (
-                self.selected_features_mask is not None
-                and len(self.selected_features_mask) == X.shape[1]
-            ):
-                logger.info(f"Application du masque de sélection de features")
-                X = X[:, self.selected_features_mask]
-                logger.info(f"Forme des données après masque: {X.shape}")
-
-            # Vérification finale
-            if np.isnan(X).any() or np.isinf(X).any():
-                logger.warning(
-                    "Valeurs NaN ou Inf détectées après prétraitement. Remplacement par zéros."
-                )
-                X = np.nan_to_num(X, nan=0.0, posinf=0.0, neginf=0.0)
-
-            return X
-
-        except Exception as e:
-            logger.error(f"Erreur lors du prétraitement: {str(e)}")
-            import traceback
-
-            logger.error(traceback.format_exc())
+        missing = [
+            name for name in self.selected_feature_names if name not in features_df
+        ]
+        if missing:
+            logger.error("Cannot preprocess, missing columns: %s", missing)
             return None
 
-    def predict(self, features_df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Effectue une prédiction avec le modèle.
+        matrix = features_df[self.selected_feature_names].to_numpy(dtype=float)
+        logger.info("Feature matrix before preprocessing: %s", matrix.shape)
+
+        if self.feature_names:
+            matrix = self._expand_to_training_space(matrix)
+
+        matrix = np.nan_to_num(matrix, nan=0.0, posinf=0.0, neginf=0.0)
+
+        if self.power_transformer is not None:
+            matrix = self._apply_transformer(
+                self.power_transformer, matrix, "PowerTransformer"
+            )
+
+        if self.scaler is not None:
+            matrix = self._apply_transformer(self.scaler, matrix, "StandardScaler")
+
+        if (
+            self.selected_features_mask is not None
+            and len(self.selected_features_mask) == matrix.shape[1]
+        ):
+            matrix = matrix[:, self.selected_features_mask]
+            logger.info("Feature matrix after selection mask: %s", matrix.shape)
+
+        return np.nan_to_num(matrix, nan=0.0, posinf=0.0, neginf=0.0)
+
+    # ------------------------------------------------------------------ #
+    # Prediction
+    # ------------------------------------------------------------------ #
+    def predict(self, features_df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+        """Score a frame of extracted features.
 
         Args:
-            features_df: DataFrame contenant les caractéristiques
+            features_df: Features for one or more URLs.
 
         Returns:
-            Tuple[np.ndarray, np.ndarray]: (probabilités, prédictions)
+            A ``(probabilities, labels)`` pair where a label of 1 means phishing.
+            On failure the caller receives a maximally uncertain 0.5 probability
+            rather than an exception, so the UI can still render a result.
         """
+        undecided = (np.array([0.5]), np.array([0]))
+
         try:
-            # Log pour le suivi
-            logger.info(
-                f"Prédiction pour les caractéristiques: {features_df.columns.tolist()}"
-            )
+            prepared = self.ensure_feature_consistency(features_df)
+            matrix = self.preprocess_features(prepared)
 
-            # S'assurer que les features sont cohérentes
-            features_df = self.ensure_feature_consistency(features_df)
+            if matrix is None:
+                logger.error("Preprocessing failed, returning an undecided result")
+                return undecided
 
-            # Prétraitement des caractéristiques
-            X = self.preprocess_features(features_df)
+            raw_scores = np.asarray(self.model.predict(matrix)).ravel()
 
-            if X is None:
-                logger.error("Échec du prétraitement des caractéristiques")
-                return np.array([0.5]), np.array([0])
-
-            # Prédiction des probabilités
-            logger.info(f"Données pour prédiction de forme: {X.shape}")
-            raw_probas = self.model.predict(X)
-            logger.info(f"Prédiction brute obtenue: {raw_probas}")
-
-            # Si le modèle retourne directement les probabilités
-            if (
-                raw_probas.ndim == 1
-                and (0 <= raw_probas.min() <= 1)
-                and (0 <= raw_probas.max() <= 1)
-            ):
-                probas = raw_probas
+            # A Booster trained with a binary objective already returns
+            # probabilities; anything outside [0, 1] is a raw margin.
+            if raw_scores.min() < 0.0 or raw_scores.max() > 1.0:
+                probabilities = 1.0 / (1.0 + np.exp(-raw_scores))
             else:
-                # Conversion des scores en probabilités si nécessaire
-                probas = 1 / (1 + np.exp(-raw_probas))
+                probabilities = raw_scores
 
-            # Prédiction des classes (0 = légitime, 1 = phishing)
-            predictions = (probas >= 0.5).astype(int)
+            labels = (probabilities >= PREDICTION_THRESHOLD).astype(int)
+            logger.info("Probabilities: %s, labels: %s", probabilities, labels)
 
-            logger.info(f"Probabilité calculée: {probas}, Prédiction: {predictions}")
+            return probabilities, labels
 
-            return probas, predictions
+        except (ValueError, TypeError, AttributeError):
+            logger.exception("Prediction failed")
+            return undecided
 
-        except Exception as e:
-            logger.error(f"Erreur lors de la prédiction: {str(e)}")
-            import traceback
-
-            logger.error(traceback.format_exc())
-            return np.array([0.5]), np.array([0])
-
-    def get_model_components(self) -> Dict[str, Any]:
-        """
-        Retourne les composants du modèle pour analyse et visualisation.
-
-        Returns:
-            Dict: Dictionnaire contenant les composants du modèle
-        """
+    # ------------------------------------------------------------------ #
+    # Introspection
+    # ------------------------------------------------------------------ #
+    def get_model_components(self) -> dict[str, Any]:
+        """Return the metrics and feature names used by the reporting views."""
         return {
             "metrics": self.metrics,
-            "selected_feature_names": self.selected_feature_names,
+            "selected_feature_names": self.get_required_features(),
         }
 
-    def get_feature_importance(self) -> Tuple[List[str], List[float]]:
-        """
-        Retourne l'importance des caractéristiques.
+    def get_feature_importance(self) -> tuple[list[str], list[float]]:
+        """Return feature names paired with their importance scores.
 
-        Returns:
-            Tuple[List[str], List[float]]: (noms des caractéristiques, scores d'importance)
+        Falls back to a uniform distribution when the bundle carries no
+        importance information, so callers can always plot something.
         """
-        if (
-            not hasattr(self.model, "feature_importances_")
-            and "feature_importance" not in self.metrics
-        ):
-            logger.warning(
-                "Aucune information d'importance des caractéristiques disponible"
-            )
-            # Retourner des valeurs par défaut
-            equal_importance = [1.0 / len(self.selected_feature_names)] * len(
-                self.selected_feature_names
-            )
-            return list(self.selected_feature_names), equal_importance
+        names = self.get_required_features()
 
-        if hasattr(self.model, "feature_importances_"):
+        importances = None
+        if hasattr(self.model, "feature_importance"):  # LightGBM Booster
+            importances = self.model.feature_importance()
+        elif hasattr(self.model, "feature_importances_"):  # scikit-learn API
             importances = self.model.feature_importances_
-        else:
-            importances = self.metrics.get("feature_importance", [])
+        elif "feature_importance" in self.metrics:
+            importances = self.metrics["feature_importance"]
 
-        # Convertir en liste Python si nécessaire
-        if isinstance(importances, np.ndarray):
-            importances = importances.tolist()
-        if isinstance(self.selected_feature_names, np.ndarray):
-            feature_names = self.selected_feature_names.tolist()
-        else:
-            feature_names = list(self.selected_feature_names)
+        if importances is None or len(importances) == 0:
+            logger.warning("No feature importance available, using a uniform split")
+            uniform = 1.0 / len(names) if names else 0.0
+            return names, [uniform] * len(names)
 
-        return feature_names, importances
+        return names, self._as_list(importances)
+
+    # ------------------------------------------------------------------ #
+    # Helpers
+    # ------------------------------------------------------------------ #
+    def _expand_to_training_space(self, matrix: np.ndarray) -> np.ndarray:
+        """Widen a selected-feature matrix back to the full training layout."""
+        logger.info("Expanding features to the transformer's training layout")
+        expanded = np.zeros((matrix.shape[0], len(self.feature_names)))
+        selected = list(self.selected_feature_names)
+
+        for target_index, feature in enumerate(self.feature_names):
+            if feature in selected:
+                expanded[:, target_index] = matrix[:, selected.index(feature)]
+
+        logger.info("Feature matrix after expansion: %s", expanded.shape)
+        return expanded
+
+    @staticmethod
+    def _apply_transformer(transformer, matrix: np.ndarray, label: str) -> np.ndarray:
+        """Apply a fitted transformer, degrading gracefully if it rejects input."""
+        try:
+            logger.info("Applying %s", label)
+            return transformer.transform(matrix)
+        except (ValueError, AttributeError) as exc:
+            logger.error("%s failed, continuing untransformed: %s", label, exc)
+            return matrix
+
+    @staticmethod
+    def _as_list(value: Any) -> list[Any]:
+        """Normalise numpy arrays, pandas indexes and sequences to a list."""
+        if value is None:
+            return []
+        if hasattr(value, "tolist"):
+            return value.tolist()
+        return list(value)
+
+    @classmethod
+    def _jsonable(cls, value: Any) -> Any:
+        """Convert a metric value into something ``json.dump`` accepts.
+
+        The bundle mixes plain scalars with numpy arrays and pandas indexes;
+        serialising the latter directly is what produced a truncated metrics
+        file in earlier versions.
+        """
+        if isinstance(value, (str, bool, int, float)) or value is None:
+            return value
+        if isinstance(value, np.generic):
+            return value.item()
+        if hasattr(value, "tolist"):
+            return value.tolist()
+        if isinstance(value, dict):
+            return {str(key): cls._jsonable(item) for key, item in value.items()}
+        if isinstance(value, (list, tuple, set)):
+            return [cls._jsonable(item) for item in value]
+        return str(value)
