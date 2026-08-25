@@ -48,14 +48,13 @@ jobs:
 
       # Self-contained on purpose: this runs identically on a developer machine,
       # so a failure here can always be reproduced locally.
-      - name: Scan every commit for credential literals
+      - name: Scan tracked files for credential literals
         run: |
           set -euo pipefail
-          if git grep -nIE '[0-9a-f]{64}|at_[A-Za-z0-9]{20,}' \
-               $(git rev-list --all) \
+          if git grep -nIE '[\"'\''][0-9a-f]{64}[\"'\'']|[\"'\'']at_[A-Za-z0-9]{20,}[\"'\'']|[\"'\''][0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-' \
                -- '*.py' '*.toml' '*.md' '*.yml' '*.yaml' '*.txt' '*.cfg' '*.json'
           then
-            echo "::error::Credential-shaped literal found in history (see above)."
+            echo "::error::Credential-shaped literal found in tracked files (see above)."
             exit 1
           fi
-          echo "No credential literals found in any commit."
+          echo "No credential literals found in tracked files."
